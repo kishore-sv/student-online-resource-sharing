@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -127,4 +128,120 @@
   html {
     @apply font-sans;
   }
+}
+
+.ProseMirror {
+	@apply px-4 pt-2;
+	outline: none !important;
+}
+
+h1.tiptap-heading {
+	@apply mb-6 mt-8 text-4xl font-bold;
+}
+
+h2.tiptap-heading {
+	@apply mb-4 mt-6 text-3xl font-bold;
+}
+
+h3.tiptap-heading {
+	@apply mb-3 mt-4 text-xl font-bold;
+}
+
+h1.tiptap-heading:first-child,
+h2.tiptap-heading:first-child,
+h3.tiptap-heading:first-child {
+	margin-top: 0;
+}
+
+h1.tiptap-heading + h2.tiptap-heading,
+h1.tiptap-heading + h3.tiptap-heading,
+h2.tiptap-heading + h1.tiptap-heading,
+h2.tiptap-heading + h3.tiptap-heading,
+h3.tiptap-heading + h1.tiptap-heading,
+h3.tiptap-heading + h2.tiptap-heading {
+	margin-top: 0;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+	@apply pointer-events-none float-left h-0 text-accent-foreground;
+	content: attr(data-placeholder);
+}
+
+.tiptap ul,
+.tiptap ol,
+.prose ul,
+.prose ol {
+	padding: 0 1.2rem;
+	margin: 1rem 0;
+}
+
+.tiptap ul,
+.prose ul {
+	list-style-type: disc !important;
+}
+
+.tiptap ol,
+.prose ol {
+	list-style-type: decimal !important;
+}
+
+/* Code Block Styling */
+.tiptap pre,
+.prose pre {
+	@apply bg-[#0d1117] text-[#c9d1d9] font-mono px-5 pb-5 rounded-2xl my-8 overflow-x-auto shadow-2xl border border-white/5;
+	tab-size: 4;
+}
+
+.tiptap pre code,
+.prose pre code {
+	@apply bg-transparent p-0 text-sm leading-relaxed;
+	font-family: inherit;
+}
+
+/* Inline Code Styling */
+.tiptap :not(pre) > code,
+.prose :not(pre) > code {
+	@apply bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-bold text-[0.9em] border border-primary/20 cursor-default;
+}
+
+.tiptap code::before,
+.tiptap code::after,
+.prose code::before,
+.prose code::after {
+	content: "" !important;
+}
+
+/* Syntax Highlighting Colors (GitHub Dark Theme) */
+.hljs-comment,
+.hljs-quote { color: #8b949e; font-style: italic; }
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-type { color: #ff7b72; font-weight: bold; }
+.hljs-string,
+.hljs-bullet,
+.hljs-symbol { color: #a5d6ff; }
+.hljs-title,
+.hljs-section,
+.hljs-name { color: #d2a8ff; }
+.hljs-class .hljs-title,
+.hljs-title.class_ { color: #ffa657; }
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attribute { color: #79c0ff; }
+.hljs-number,
+.hljs-literal,
+.hljs-built_in { color: #ff7b72; }
+.hljs-params,
+.hljs-attr { color: #c9d1d9; }
+.hljs-function .hljs-title { color: #d2a8ff; }
+
+.tiptap blockquote,
+.prose blockquote {
+	border-left: 4px solid var(--primary);
+	margin: 1.5rem 0;
+	padding-left: 1rem;
+	font-style: italic;
+    background-color: color-mix(in srgb, var(--primary) 5%, transparent);
+    padding: 1rem 1rem 1rem 1.5rem;
+    border-radius: 0 0.5rem 0.5rem 0;
 }

@@ -20,9 +20,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { IconSelector, IconSparkles, IconRosetteDiscountCheck, IconCreditCard, IconBell, IconLogout } from "@tabler/icons-react"
+import { IconSelector, IconSparkles, IconRosetteDiscountCheck, IconCreditCard, IconBell, IconLogout, IconUser, IconRss, IconSun, IconBrightness, IconFolder } from "@tabler/icons-react"
 import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
 
 export function NavUser({
   user,
@@ -35,6 +36,7 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
+  const { theme, setTheme } = useTheme()
 
   const handleSignOut = async () => {
     await authClient.signOut()
@@ -89,9 +91,18 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <IconSparkles
-                />
-                Upgrade to Pro
+                <a href={`/${user.name}/profile`} className="flex items-center gap-1">
+                  <IconUser
+                  />
+                  View Profile
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <a href={`/${user.name}/resources`} className="flex items-center gap-1">
+                  <IconFolder
+                  />
+                  View Resources
+                </a>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -111,6 +122,10 @@ export function NavUser({
                 />
                 Notifications
               </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => { theme === "dark" ? setTheme("light") : setTheme("dark") }}>
+                <IconBrightness />
+                Toggle Theme
+              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:bg-destructive focus:text-destructive-foreground">
@@ -118,9 +133,10 @@ export function NavUser({
               />
               Log out
             </DropdownMenuItem>
+
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
-    </SidebarMenu>
+    </SidebarMenu >
   )
 }
