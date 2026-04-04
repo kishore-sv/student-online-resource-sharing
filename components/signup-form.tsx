@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { toast } from "sonner"
 
 const COLLEGES = [
     { label: "Presidency University", value: "presidency-university" },
@@ -51,10 +52,15 @@ export function SignupForm({
   const [name, setName] = useState("");
   const [collegeName, setCollegeName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<"google" | "github" | null>(null);
   const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!collegeName) {
+        toast.error("Please select a college");
+        return;
+    }
     setLoading(true);
     const { data, error } = await signUp.email({
       email,
@@ -64,19 +70,23 @@ export function SignupForm({
     });
     setLoading(false);
     if (!error) {
+      toast.success("Account created successfully!");
       router.push("/dashboard");
     } else {
-      alert(error.message || "An error occurred");
+      toast.error(error.message || "An error occurred");
     }
   };
 
   const handleSocialSignup = async (provider: "google" | "github") => {
-    setLoading(true);
-    await signIn.social({
+    setSocialLoading(provider);
+    const { error } = await signIn.social({
       provider,
       callbackURL: "/dashboard",
     });
-    setLoading(false);
+    setSocialLoading(null);
+    if (error) {
+        toast.error(error.message || `Failed to sign up with ${provider}`);
+    }
   };
 
   return (
@@ -94,7 +104,8 @@ export function SignupForm({
                   Join StudyHub and start sharing resources
                 </p>
               </div>
-              <Field className="grid grid-cols-2 gap-4">
+
+              <div className="grid grid-cols-2 gap-4">
                 <Field>
                     <FieldLabel htmlFor="name">Full Name</FieldLabel>
                     <Input
@@ -109,10 +120,10 @@ export function SignupForm({
                 <Field>
                     <FieldLabel htmlFor="college">College Name</FieldLabel>
                     <Select onValueChange={setCollegeName} required>
-                        <SelectTrigger id="college" className="w-full">
-                            <SelectValue placeholder="Select your college" />
+                        <SelectTrigger id="college" className="w-full h-9">
+                            <SelectValue placeholder="Select" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-56">
                             {COLLEGES.map((college) => (
                                 <SelectItem key={college.value} value={college.label}>
                                     {college.label}
@@ -121,7 +132,8 @@ export function SignupForm({
                         </SelectContent>
                     </Select>
                 </Field>
-              </Field>
+              </div>
+
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
@@ -133,6 +145,7 @@ export function SignupForm({
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </Field>
+
               <Field>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
                 <Input 
@@ -146,6 +159,7 @@ export function SignupForm({
                    At least 8 characters long.
                 </FieldDescription>
               </Field>
+
               <Field>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Creating account..." : "Create Account"}
@@ -159,24 +173,32 @@ export function SignupForm({
                     variant="outline" 
                     type="button" 
                     onClick={() => handleSocialSignup("google")}
-                    disabled={loading}
+                    disabled={loading || !!socialLoading}
                     className="cursor-pointer"
                 >
-                  <IconBrandGoogle className="w-5 h-5 mr-2" />
+                  {socialLoading === "google" ? (
+                    <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                  ) : (
+                    <IconBrandGoogle className="w-5 h-5 mr-2" />
+                  )}
                   Google
                 </Button>
                 <Button 
                     variant="outline" 
                     type="button" 
                     onClick={() => handleSocialSignup("github")}
-                    disabled={loading}
+                    disabled={loading || !!socialLoading}
                     className="cursor-pointer"
                 >
-                  <IconBrandGithub className="w-5 h-5 mr-2" />
+                  {socialLoading === "github" ? (
+                    <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                  ) : (
+                    <IconBrandGithub className="w-5 h-5 mr-2" />
+                  )}
                   GitHub
                 </Button>
               </div>
-              <FieldDescription className="text-center mt-4">
+              <FieldDescription className="text-center mt-2">
                 Already have an account? <a href="/login" className="text-primary font-medium hover:underline">Sign in</a>
               </FieldDescription>
             </FieldGroup>

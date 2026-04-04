@@ -13,8 +13,8 @@ import { Input } from "@/components/ui/input"
 import { signIn } from "@/lib/auth-client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { IconBrandGithub, IconBrandGoogle } from "@tabler/icons-react"
-import { Zap } from "lucide-react"
+import { IconBrandGithub, IconBrandGoogle, IconBook } from "@tabler/icons-react"
+import { toast } from "sonner"
 
 export function LoginForm({
   className,
@@ -23,6 +23,7 @@ export function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<"google" | "github" | null>(null);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -34,19 +35,23 @@ export function LoginForm({
     });
     setLoading(false);
     if (!error) {
+      toast.success("Welcome back to StudyHub!");
       router.push("/dashboard");
     } else {
-      alert(error.message || "An error occurred");
+      toast.error(error.message || "Invalid credentials");
     }
   };
 
   const handleSocialLogin = async (provider: "google" | "github") => {
-    setLoading(true);
-    await signIn.social({
+    setSocialLoading(provider);
+    const { error } = await signIn.social({
       provider,
       callbackURL: "/dashboard",
     });
-    setLoading(false);
+    setSocialLoading(null);
+    if (error) {
+        toast.error(error.message || `Failed to sign in with ${provider}`);
+    }
   };
 
   return (
@@ -55,11 +60,11 @@ export function LoginForm({
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-6 md:p-8" onSubmit={handleLogin}>
             <FieldGroup>
-              <div className="flex flex-col items-center gap-2 text-center mb-4">
-                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mb-2">
-                  <Zap className="w-6 h-6 text-primary" />
+              <div className="flex flex-col items-center gap-2 text-center">
+                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mb-2">
+                    <IconBook className="w-6 h-6 text-primary" />
                 </div>
-                <h1 className="text-2xl font-bold">Welcome back</h1>
+                <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
                 <p className="text-balance text-muted-foreground text-sm">
                   Login to your StudyHub account
                 </p>
@@ -85,45 +90,53 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                <Input 
+                    id="password" 
+                    type="password" 
+                    required 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                 />
               </Field>
               <Field>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Logging in..." : "Login"}
+                  {loading ? "Signing in..." : "Login"}
                 </Button>
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
               </FieldSeparator>
               <div className="grid grid-cols-2 gap-4">
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => handleSocialLogin("google")}
-                  disabled={loading}
-                  className="cursor-pointer"
+                <Button 
+                    variant="outline" 
+                    type="button" 
+                    onClick={() => handleSocialLogin("google")}
+                    disabled={loading || !!socialLoading}
+                    className="cursor-pointer"
                 >
-                  <IconBrandGoogle className="w-5 h-5 mr-2" />
+                  {socialLoading === "google" ? (
+                    <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                  ) : (
+                    <IconBrandGoogle className="w-5 h-5 mr-2" />
+                  )}
                   Google
                 </Button>
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => handleSocialLogin("github")}
-                  disabled={loading}
-                  className="cursor-pointer"
+                <Button 
+                    variant="outline" 
+                    type="button" 
+                    onClick={() => handleSocialLogin("github")}
+                    disabled={loading || !!socialLoading}
+                    className="cursor-pointer"
                 >
-                  <IconBrandGithub className="w-5 h-5 mr-2" />
+                  {socialLoading === "github" ? (
+                    <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                  ) : (
+                    <IconBrandGithub className="w-5 h-5 mr-2" />
+                  )}
                   GitHub
                 </Button>
               </div>
-              <FieldDescription className="text-center mt-4">
+              <FieldDescription className="text-center">
                 Don&apos;t have an account? <a href="/signup" className="text-primary hover:underline font-medium">Sign up</a>
               </FieldDescription>
             </FieldGroup>

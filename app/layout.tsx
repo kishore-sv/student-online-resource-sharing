@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import NavBar from "@/components/nav-bar";
+import Navbar from "@/components/Navbar";
 import Footer from "@/components/footer";
+import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 const inter = Inter({
@@ -54,7 +55,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TooltipProvider>
+            <Toaster position="top-center" richColors />
+
             {children}
+
           </TooltipProvider>
         </ThemeProvider>
       </body>

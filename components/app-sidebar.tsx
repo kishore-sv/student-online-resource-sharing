@@ -16,6 +16,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { IconTerminal2, IconRobot, IconBook, IconSettings, IconLifebuoy, IconSend, IconFrame, IconChartPie, IconMap, IconCommand } from "@tabler/icons-react"
+import { authClient } from "@/lib/auth-client"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const data = {
   user: {
@@ -169,6 +171,8 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session, isPending } = authClient.useSession()
+  const user = session?.user
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -176,12 +180,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <IconCommand className="size-4" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <IconBook className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-medium text-foreground">StudyHub</span>
+                  <span className="truncate text-xs text-muted-foreground">Student Resource Platform</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -194,7 +198,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {isPending ? (
+            <div className="px-2 py-1.5 flex items-center gap-2">
+                <Skeleton className="h-8 w-8 rounded-lg" />
+                <div className="space-y-1">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-2 w-24" />
+                </div>
+            </div>
+        ) : user ? (
+            <NavUser user={{
+              name: user.name,
+              email: user.email,
+              avatar: user.image || "",
+            }} />
+        ) : null}
       </SidebarFooter>
     </Sidebar>
   )
