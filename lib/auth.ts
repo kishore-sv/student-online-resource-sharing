@@ -1,7 +1,11 @@
 import { betterAuth } from "better-auth";
+import { emailOTP } from "better-auth/plugins"
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
 import * as schema from "./db/schema";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -15,13 +19,22 @@ export const auth = betterAuth({
     }),
     emailAndPassword: {
         enabled: true,
+        requireEmailVerification: true,
         async sendResetPassword(data: any, request: any) {
-            console.log("Send reset password email", data.user.email, data.url);
-            // Implement your email sending logic here (e.g., using Resend or Nodemailer)
+            await resend.emails.send({
+                from: "StudyHub <onboarding@resend.dev>",
+                to: data.user.email,
+                subject: "Reset your password",
+                text: `Reset your password by clicking here: ${data.url}`,
+            });
         },
         async sendVerificationEmail(data: any, request: any) {
-            console.log("Send verification email", data.user.email, data.url);
-            // Implement your email sending logic here
+            await resend.emails.send({
+                from: "StudyHub <onboarding@resend.dev>",
+                to: data.user.email,
+                subject: "Verify your email",
+                text: `Verify your email by clicking here: ${data.url}`,
+            });
         },
     },
     socialProviders: {
@@ -48,4 +61,21 @@ export const auth = betterAuth({
             },
         },
     },
+    plugins: [
+        emailOTP({
+            async sendVerificationOTP({ email, otp, type }) {
+                const subject = 
+                    type === "email-verification" ? "Verify your email" :
+                    type === "forget-password" ? "Reset your password" :
+                    "Verification code";
+
+                await resend.emails.send({
+                    from: "StudyHub <onboarding@resend.dev>",
+                    to: email,
+                    subject,
+                    text: `Your verification code is: ${otp}`,
+                });
+            }
+        })
+    ]
 });

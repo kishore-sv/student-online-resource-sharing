@@ -15,6 +15,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { IconBrandGithub, IconBrandGoogle, IconBook } from "@tabler/icons-react"
 import { toast } from "sonner"
+import Link from "next/link"
 
 export function LoginForm({
   className,
@@ -83,12 +84,12 @@ export function LoginForm({
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-2 hover:underline text-muted-foreground"
+                  <Link
+                    href="/forgot-password"
+                    className="ml-auto text-sm underline-offset-2 hover:underline text-muted-foreground transition-colors"
                   >
                     Forgot your password?
-                  </a>
+                  </Link>
                 </div>
                 <Input 
                     id="password" 

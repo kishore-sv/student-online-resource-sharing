@@ -10,7 +10,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { signUp, signIn } from "@/lib/auth-client"
+import { signUp, signIn, authClient } from "@/lib/auth-client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { IconBrandGithub, IconBrandGoogle } from "@tabler/icons-react"
@@ -70,8 +70,13 @@ export function SignupForm({
     });
     setLoading(false);
     if (!error) {
-      toast.success("Account created successfully!");
-      router.push("/dashboard");
+      // Manually send the OTP
+      await authClient.emailOtp.sendVerificationOtp({
+        email,
+        type: "email-verification",
+      });
+      toast.success("Account created! Check your email for verification code.");
+      router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
     } else {
       toast.error(error.message || "An error occurred");
     }
