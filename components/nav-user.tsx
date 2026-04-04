@@ -30,6 +30,7 @@ export function NavUser({
 }: {
   user: {
     name: string
+    username: string
     email: string
     avatar: string
   }
@@ -91,14 +92,14 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <a href={`/${user.name}/profile`} className="flex items-center gap-1">
+                <a href={`/${user.username}/profile`} className="flex items-center gap-1 w-full">
                   <IconUser
                   />
                   View Profile
                 </a>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <a href={`/${user.name}/resources`} className="flex items-center gap-1">
+                <a href={`/${user.username}/resources`} className="flex items-center gap-1 w-full">
                   <IconFolder
                   />
                   View Resources

@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth"
 import { NextRequest, NextResponse } from "next/server"
 
 const AUTH_ROUTES = ["/signin", "/login", "/signup"]
-const PROTECTED_ROUTES = ["/dashboard", "/settings", "/profile"]
+const PROTECTED_ROUTES = ["/home", "/settings", "/profile"]
 
 export async function proxyHandler(request: NextRequest) {
   const session = await auth.api.getSession({
@@ -13,7 +13,7 @@ export async function proxyHandler(request: NextRequest) {
 
   // Logged-in user trying to access auth pages → send to dashboard
   if (session && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
-    return NextResponse.redirect(new URL("/dashboard", request.url))
+    return NextResponse.redirect(new URL("/home", request.url))
   }
 
   // Logged-out user trying to access protected pages → send to login

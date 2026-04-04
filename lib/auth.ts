@@ -19,7 +19,7 @@ export const auth = betterAuth({
     }),
     emailAndPassword: {
         enabled: true,
-        requireEmailVerification: true,
+        requireEmailVerification: false,
         async sendResetPassword(data: any, request: any) {
             await resend.emails.send({
                 from: "StudyHub <onboarding@resend.dev>",
@@ -54,20 +54,19 @@ export const auth = betterAuth({
                 required: false,
                 defaultValue: "",
             },
-            role: {
+            username: {
                 type: "string",
-                required: false,
-                defaultValue: "student",
+                required: true,
             },
         },
     },
     plugins: [
         emailOTP({
             async sendVerificationOTP({ email, otp, type }) {
-                const subject = 
+                const subject =
                     type === "email-verification" ? "Verify your email" :
-                    type === "forget-password" ? "Reset your password" :
-                    "Verification code";
+                        type === "forget-password" ? "Reset your password" :
+                            "Verification code";
 
                 await resend.emails.send({
                     from: "StudyHub <onboarding@resend.dev>",

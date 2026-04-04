@@ -1,7 +1,10 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import FileUpload from "@/components/file-upload"
+import { authClient } from "@/lib/auth-client"
+import { createResource } from "@/lib/actions"
+import { getPublicResources } from "@/lib/db/queries"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Breadcrumb,
@@ -38,160 +41,18 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { ResourceCard } from "@/components/resource-card"
-
-const featuredResources = [
-  {
-    id: 1,
-    author: "Kishore",
-    authorImage: "https://avatars.githubusercontent.com/u/190291807?v=4",
-    title: "Data Fetching",
-    description: "Data Fetching is a process of fetching data from a data source.",
-    image: "/demo-ppt.png",
-    tags: ["Data Fetching", "React", "Next.js"],
-    docType: "pptx",
-    docUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    docSize: "10MB",
-    docNumberOfPages: 29,
-    likes: 10,
-    comments: 5,
-    shares: 2,
-    createdAt: "2022-01-01",
-    updatedAt: "2022-01-01",
-  },
-  {
-    id: 2,
-    author: "Mohan",
-    authorImage: "https://avatars.githubusercontent.com/u/102384377?v=4",
-    title: "Data Fetching",
-    description: "Data Fetching is a process of fetching data from a data source.",
-    image: "",
-    tags: ["Data Fetching", "React", "Next.js"],
-    docType: "docx",
-    docUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    docSize: "10MB",
-    docNumberOfPages: 29,
-    likes: 10,
-    comments: 5,
-    shares: 2,
-    createdAt: "2022-01-01",
-    updatedAt: "2022-01-01",
-  }, {
-    id: 3,
-    author: "Mohan",
-    authorImage: "https://avatars.githubusercontent.com/u/102384377?v=4",
-    title: "Data Fetching",
-    description: "Data Fetching is a process of fetching data from a data source.",
-    image: "/neo.webp",
-    tags: ["Data Fetching", "React", "Next.js"],
-    docType: "blog",
-    docUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    docSize: "10MB",
-    docNumberOfPages: 29,
-    likes: 10,
-    comments: 5,
-    shares: 2,
-    createdAt: "2022-01-01",
-    updatedAt: "2022-01-01",
-  },
-  {
-    id: 4,
-    author: "Mohan",
-    authorImage: "https://avatars.githubusercontent.com/u/102384377?v=4",
-    title: "Data Fetching",
-    description: "Data Fetching is a process of fetching data from a data source.",
-    image: "/demo-ppt.png",
-    tags: ["Data Fetching", "React", "Next.js"],
-    docType: "doc",
-    docUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    docSize: "10MB",
-    docNumberOfPages: 29,
-    likes: 10,
-    comments: 5,
-    shares: 2,
-    createdAt: "2022-01-01",
-    updatedAt: "2022-01-01",
-  },
-]
-
-const MostPopularinEducation = [
-  {
-    id: 1,
-    author: "Kishore",
-    authorImage: "https://avatars.githubusercontent.com/u/190291807?v=4",
-    title: "Data Fetching",
-    description: "Data Fetching is a process of fetching data from a data source.",
-    image: "/demo-ppt.png",
-    tags: ["Data Fetching", "React", "Next.js"],
-    docType: "pptx",
-    docUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    docSize: "10MB",
-    docNumberOfPages: 29,
-    likes: 10,
-    comments: 5,
-    shares: 2,
-    createdAt: "2022-01-01",
-    updatedAt: "2022-01-01",
-  },
-  {
-    id: 2,
-    author: "Mohan",
-    authorImage: "https://avatars.githubusercontent.com/u/102384377?v=4",
-    title: "Data Fetching",
-    description: "Data Fetching is a process of fetching data from a data source.",
-    image: "",
-    tags: ["Data Fetching", "React", "Next.js"],
-    docType: "docx",
-    docUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    docSize: "10MB",
-    docNumberOfPages: 29,
-    likes: 10,
-    comments: 5,
-    shares: 2,
-    createdAt: "2022-01-01",
-    updatedAt: "2022-01-01",
-  }, {
-    id: 3,
-    author: "Mohan",
-    authorImage: "https://avatars.githubusercontent.com/u/102384377?v=4",
-    title: "Data Fetching",
-    description: "Data Fetching is a process of fetching data from a data source.",
-    image: "/demo-ppt.png",
-    tags: ["Data Fetching", "React", "Next.js"],
-    docType: "doc",
-    docUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    docSize: "10MB",
-    docNumberOfPages: 29,
-    likes: 10,
-    comments: 5,
-    shares: 2,
-    createdAt: "2022-01-01",
-    updatedAt: "2022-01-01",
-  },
-  {
-    id: 4,
-    author: "Mohan",
-    authorImage: "https://avatars.githubusercontent.com/u/102384377?v=4",
-    title: "Data Fetching",
-    description: "Data Fetching is a process of fetching data from a data source.",
-    image: "/demo-ppt.png",
-    tags: ["Data Fetching", "React", "Next.js"],
-    docType: "doc",
-    docUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    docSize: "10MB",
-    docNumberOfPages: 29,
-    likes: 10,
-    comments: 5,
-    shares: 2,
-    createdAt: "2022-01-01",
-    updatedAt: "2022-01-01",
-  },
-]
+import { EmptyState } from "@/components/ui/empty-state"
 
 const AVAILABLE_TOPICS = [
   "Programming", "Mathematics", "Science", "History", "Design", "Business", "Language", "Music", "Other"
 ]
 
 export default function Page() {
+  const { data: session } = authClient.useSession()
+  const [showProfilePrompt, setShowProfilePrompt] = useState(false)
+  const [selectedCollege, setSelectedCollege] = useState("")
+  const [username, setUsername] = useState("")
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [topics, setTopics] = useState<string[]>([])
@@ -208,123 +69,169 @@ export default function Page() {
     setTopics(topics.filter((t: string) => t !== topic))
   }
 
-  const handleUpload = () => {
-    if (!title || !description || topics.length === 0) {
-      toast.error("Please fill in all fields and add at least one topic")
+  const [featured, setFeatured] = useState<any[]>([])
+  const [popular, setPopular] = useState<any[]>([])
+
+  useEffect(() => {
+    if (session?.user && (!session.user.collegeName || !session.user.username)) {
+      setShowProfilePrompt(true)
+    }
+
+    // Fetch real resources
+    const fetchResources = async () => {
+      const data = await getPublicResources(20)
+      setFeatured(data.slice(0, 10))
+      setPopular(data.slice(10, 20))
+    }
+    fetchResources()
+  }, [session])
+
+  const handleProfileUpdate = async () => {
+    if (!selectedCollege || !username) {
+      toast.error("Please fill in all fields")
       return
     }
+
+    if (username.length < 3) {
+      toast.error("Username too short")
+      return
+    }
+
+    setIsUpdatingProfile(true)
+    const { error } = await authClient.updateUser({
+      collegeName: selectedCollege,
+      username: username.toLowerCase().replace(/\s+/g, ""),
+    })
+    setIsUpdatingProfile(false)
+    if (!error) {
+      setShowProfilePrompt(false)
+      toast.success("Profile saved!")
+    } else {
+      toast.error(error.message || "Failed to update profile")
+    }
+  }
+
+  const handleUpload = async () => {
+    if (!title || topics.length === 0) {
+      toast.error("Please fill in all required fields")
+      return
+    }
+    if (!session?.user) return
+
     setIsUploading(true)
-    // Here logic for upload would go
-    setTimeout(() => {
-      toast.success("Resource uploaded successfully!")
-      setIsUploading(false)
-      // Reset state
+    const { error }: any = await createResource({
+      title,
+      description,
+      category: "file",
+      visibility: visibility.toLowerCase() as any,
+      authorId: session.user.id,
+      tags: topics
+    })
+
+    setIsUploading(false)
+    if (!error) {
+      toast.success("Resource shared!")
       setTitle("")
       setDescription("")
       setTopics([])
-    }, 1500)
+    } else {
+      toast.error(error.message || "Failed to share")
+    }
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2">
-          <div className="flex items-center gap-2 px-4">
+    <>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-vertical:h-4 data-vertical:self-auto"
-            />
+            <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>
               <BreadcrumbList>
-                <BreadcrumbItem className="md:block">
-                  <BreadcrumbLink href="/home">
-                    Home
-                  </BreadcrumbLink>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/home">Home</BreadcrumbLink>
                 </BreadcrumbItem>
-                {/* <BreadcrumbSeparator className="hidden md:block" /> */}
-                {/* <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem> */}
               </BreadcrumbList>
             </Breadcrumb>
-          </div>
-        </header>
+          </header>
 
-        <section className="flex flex-1 flex-col gap-4 p-4 pt-0 h-[40vh] max-h-[40vh] overflow-hidden mb-4">
-          <div>
-            <h2 className="text-2xl font-bold">New Resource</h2>
-            <p className="text-muted-foreground">What&apos;s new thing you want to share?</p>
-          </div>
-          <div className="flex gap-2 items-center">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="cursor-pointer">Upload file <Upload className="ml-2 h-4 w-4" /></Button>
-              </DialogTrigger>
-              <DialogContent
-                className="sm:max-w-xl max-h-[90vh] flex flex-col p-0 overflow-hidden"
-                onInteractOutside={(e) => e.preventDefault()}
-              >
-                <DialogHeader className="p-6 pb-2">
-                  <DialogTitle className="text-xl font-bold">Share a Resource</DialogTitle>
-                  <DialogDescription>
-                    Provide details about the resource to help other students find it.
-                  </DialogDescription>
-                </DialogHeader>
+          <section className="p-6 pb-2 space-y-6">
+            <div className="space-y-1">
+              <h2 className="text-2xl font-bold tracking-tight">New Resource</h2>
+              <p className="text-muted-foreground text-sm">Share knowledge with your community</p>
+            </div>
+            <div className="flex gap-3 items-center">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload file
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Share File</DialogTitle>
+                    <DialogDescription>
+                      Fill in the details below to upload your resource.
+                    </DialogDescription>
+                  </DialogHeader>
 
-                <div className="flex-1 overflow-y-auto px-6 py-4">
-                  <div className="grid gap-6">
-                    <div className="grid gap-2">
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
                       <Label htmlFor="title">Title</Label>
                       <Input
                         id="title"
-                        placeholder="e.g. Intro to Quantum Computing"
+                        placeholder="Resource title"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                       />
                     </div>
-
-                    <div className="grid gap-2">
+                    <div className="space-y-2">
                       <Label htmlFor="description">Description</Label>
                       <Textarea
                         id="description"
-                        placeholder="Describe what's in this resource..."
-                        className="resize-none min-h-24"
+                        placeholder="What is this about?"
+                        className="min-h-[100px]"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                       />
                     </div>
-
-                    <div className="grid gap-2">
-                      <Label>Visibility</Label>
-                      <Select value={visibility} onValueChange={setVisibility}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select visibility" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Public">Public (Everyone can view)</SelectItem>
-                          <SelectItem value="Private">Private (Only you can view)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Visibility</Label>
+                        <Select value={visibility} onValueChange={setVisibility}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Public">Public</SelectItem>
+                            <SelectItem value="Private">Private</SelectItem>
+                            <SelectItem value="Shared">Friends</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2 text-right">
+                        <Label>File Upload</Label>
+                        <FileUpload />
+                      </div>
                     </div>
-
-                    <div className="grid gap-2">
+                    <div className="space-y-2">
                       <Label>Topics</Label>
                       <div className="flex flex-wrap gap-2 mb-2">
                         {topics.map(topic => (
-                          <Badge key={topic} variant="secondary" className="gap-1 px-2 py-1">
+                          <Badge key={topic} variant="secondary" className="gap-1">
                             {topic}
                             <X
-                              className="h-3 w-3 cursor-pointer hover:text-destructive"
+                              className="h-3 w-3 cursor-pointer"
                               onClick={() => handleRemoveTopic(topic)}
                             />
                           </Badge>
                         ))}
                       </div>
                       <Select onValueChange={handleAddTopic}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Add a topic..." />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select topic" />
                         </SelectTrigger>
                         <SelectContent>
                           {AVAILABLE_TOPICS.map(topic => (
@@ -333,74 +240,148 @@ export default function Page() {
                         </SelectContent>
                       </Select>
                     </div>
-
-                    <div className="grid gap-2 border-t border-border/50 pt-4 mt-2">
-                      <Label>File Upload</Label>
-                      <FileUpload />
-                    </div>
                   </div>
+
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button onClick={handleUpload} disabled={isUploading}>
+                      {isUploading ? "Uploading..." : "Publish"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              <Link href="/write-blog">
+                <Button variant="outline">
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Write blog
+                </Button>
+              </Link>
+            </div>
+          </section>
+
+          <Separator className="mx-6 w-auto" />
+
+          <div className="p-6 space-y-12">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold tracking-tight">Featured</h2>
+                <div className="flex items-center gap-2">
+                  <Link href="/all-resources" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                    View all
+                  </Link>
                 </div>
+              </div>
 
-                <DialogFooter className="p-6 pt-2 gap-2 sm:gap-0 font-bold border-t bg-muted/30">
-                  <DialogClose asChild>
-                    <Button variant="outline" className="cursor-pointer">Cancel</Button>
-                  </DialogClose>
-                  <Button
-                    onClick={handleUpload}
-                    disabled={isUploading}
-                    className="cursor-pointer"
-                  >
-                    {isUploading ? "Uploading..." : "Share Resource"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            <Link href="/write-blog">
-              <Button className="cursor-pointer">Write blog <Pencil className="ml-2 h-4 w-4" /></Button>
-            </Link>
+              <Carousel className="w-full">
+                <CarouselContent className="-ml-4">
+                  {featured.length > 0 ? featured.map(resource => (
+                    <CarouselItem key={resource.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                      <ResourceCard resource={resource} />
+                    </CarouselItem>
+                  )) : (
+                    <div className="w-full px-4">
+                      <EmptyState
+                        title="No resources found"
+                        description="No featured resources available yet."
+                        icon={FileText}
+                        className="min-h-[300px]"
+                      />
+                    </div>
+                  )}
+                </CarouselContent>
+                <CarouselPrevious className="hidden md:flex -left-4 bg-background shadow-md border-border" />
+                <CarouselNext className="hidden md:flex -right-4 bg-background shadow-md border-border" />
+              </Carousel>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold tracking-tight">Popular in Education</h2>
+                <Link href="/all-resources?category=education" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                  View all
+                </Link>
+              </div>
+
+              <Carousel className="w-full">
+                <CarouselContent className="-ml-4">
+                  {popular.length > 0 ? popular.map(resource => (
+                    <CarouselItem key={resource.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                      <ResourceCard resource={resource} />
+                    </CarouselItem>
+                  )) : (
+                    <div className="w-full px-4">
+                      <EmptyState
+                        title="No trending resources"
+                        description="Be first to share something trending."
+                        icon={Heart}
+                        className="min-h-[300px]"
+                      />
+                    </div>
+                  )}
+                </CarouselContent>
+                <CarouselPrevious className="hidden md:flex -left-4 bg-background shadow-md border-border" />
+                <CarouselNext className="hidden md:flex -right-4 bg-background shadow-md border-border" />
+              </Carousel>
+            </div>
           </div>
-        </section>
+        </SidebarInset>
+      </SidebarProvider >
 
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <Carousel className="w-[80vw]">
-            <div className="flex items-center justify-between gap-4 mb-4">
-              <h2 className="text-2xl font-bold">Featured</h2>
-              <div className="flex items-center gap-2">
-                <CarouselPrevious className="static cursor-pointer translate-y-0 translate-x-0 h-9 w-9" />
-                <CarouselNext className="static cursor-pointer translate-y-0 translate-x-0 h-9 w-9" />
+      {/* Profile Prompt for new social signups */}
+      <Dialog open={showProfilePrompt} onOpenChange={() => { }}>
+        <DialogContent onPointerDownOutside={(e) => e.preventDefault()} className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Profile Information</DialogTitle>
+            <DialogDescription>
+              Please provide your details before you start.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-6">
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1.5 text-muted-foreground text-sm">@</span>
+                <Input
+                  id="username"
+                  className="pl-8"
+                  placeholder="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
               </div>
             </div>
-            <CarouselContent className="-ml-4 p-2">
-              {featuredResources.map(resource => (
-                <CarouselItem key={resource.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                  <ResourceCard resource={resource} />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-          <Button className="w-fit mx-auto cursor-pointer group">View More <ArrowRight className="size-4 group-hover:translate-x-1 transition-all duration-300" /> </Button>
-        </div>
-
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <Carousel className="w-[80vw]">
-            <div className="flex items-center justify-between gap-4 mb-4">
-              <h2 className="text-2xl font-bold">Most Popular in Education</h2>
-              <div className="flex items-center gap-2">
-                <CarouselPrevious className="static cursor-pointer translate-y-0 translate-x-0 h-9 w-9" />
-                <CarouselNext className="static cursor-pointer translate-y-0 translate-x-0 h-9 w-9" />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="college">College Name</Label>
+              <Select onValueChange={setSelectedCollege}>
+                <SelectTrigger id="college">
+                  <SelectValue placeholder="Select institution" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Presidency University">Presidency University</SelectItem>
+                  <SelectItem value="RV University">RV University</SelectItem>
+                  <SelectItem value="REVA University">REVA University</SelectItem>
+                  <SelectItem value="BMSCE">BMSCE</SelectItem>
+                  <SelectItem value="PES University">PES University</SelectItem>
+                  <SelectItem value="MSRIT">MSRIT</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <CarouselContent className="-ml-4 p-2">
-              {MostPopularinEducation.map(resource => (
-                <CarouselItem key={resource.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                  <ResourceCard resource={resource} />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-          <Button className="w-fit mx-auto cursor-pointer group">View More <ArrowRight className="size-4 group-hover:translate-x-1 transition-all duration-300" /> </Button>
-        </div>
-      </SidebarInset>
-    </SidebarProvider >
+          </div>
+          <DialogFooter>
+            <Button
+              variant="default"
+              onClick={handleProfileUpdate}
+              disabled={isUpdatingProfile}
+              className="w-full"
+            >
+              {isUpdatingProfile ? "Saving..." : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

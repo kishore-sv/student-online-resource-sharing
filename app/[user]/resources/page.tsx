@@ -1,81 +1,54 @@
 "use client"
-
+ 
+import { useState, useEffect } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { ResourceCard } from "@/components/resource-card"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { Card, CardContent } from "@/components/ui/card"
-import { FileText } from "lucide-react"
+import { FileText, Search, Filter, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-// Mock User Resources
-const userResources = [
-    {
-        id: 1,
-        author: "Kishore",
-        authorImage: "https://avatars.githubusercontent.com/u/190291807?v=4",
-        title: "Data Fetching in React",
-        description: "A comprehensive guide to fetching data safely in React and Next.js.",
-        image: "/demo-ppt.png",
-        tags: ["Data Fetching", "React", "Next.js"],
-        docType: "pptx",
-        docUrl: "#",
-        docSize: "10MB",
-        docNumberOfPages: 29,
-        likes: 42,
-        comments: 12,
-        shares: 8,
-        createdAt: "2024-03-20",
-        updatedAt: "2024-03-20",
-    },
-    {
-        id: 2,
-        author: "Kishore",
-        authorImage: "https://avatars.githubusercontent.com/u/190291807?v=4",
-        title: "DSA Graph Algorithms",
-        description: "Notes on shortest path algorithms: Dijkstra, Bellman-Ford, and Floyd-Warshall.",
-        image: "",
-        tags: ["DSA", "Graphs", "CS"],
-        docType: "pdf",
-        docUrl: "#",
-        docSize: "5MB",
-        docNumberOfPages: 14,
-        likes: 85,
-        comments: 24,
-        shares: 31,
-        createdAt: "2024-02-15",
-        updatedAt: "2024-02-15",
-    },
-    {
-        id: 3,
-        author: "Kishore",
-        authorImage: "https://avatars.githubusercontent.com/u/190291807?v=4",
-        title: "DBMS Entity Relationship",
-        description: "Detailed study material for ER diagrams and database normalization.",
-        image: "",
-        tags: ["DBMS", "Database"],
-        docType: "docx",
-        docUrl: "#",
-        docSize: "2MB",
-        docNumberOfPages: 8,
-        likes: 21,
-        comments: 5,
-        shares: 12,
-        createdAt: "2024-01-10",
-        updatedAt: "2024-01-10",
-    }
-]
+import { useParams } from "next/navigation"
+import { getResourcesByUser } from "@/lib/db/queries"
+import { authClient } from "@/lib/auth-client"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Input } from "@/components/ui/input"
 
 export default function ResourcesPage() {
+    const { user: usernameParam } = useParams()
+    const { data: session } = authClient.useSession()
+    const [resources, setResources] = useState<any[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [searchQuery, setSearchQuery] = useState("")
+
+    const username = typeof usernameParam === 'string' ? usernameParam : usernameParam?.[0]
+    const isOwnProfile = session?.user?.username === username
+
+    useEffect(() => {
+        const fetchResources = async () => {
+            if (username) {
+                const data = await getResourcesByUser(username)
+                setResources(data)
+                setIsLoading(false)
+            }
+        }
+        fetchResources()
+    }, [username])
+
+    const filteredResources = resources.filter(res => 
+        res.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        res.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+
     return (
         <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2">
-                    <div className="flex items-center gap-2 px-4">
+                <header className="flex h-16 shrink-0 items-center justify-between border-b bg-background px-6">
+                    <div className="flex items-center gap-2">
                         <SidebarTrigger className="-ml-1" />
-                        <Separator orientation="vertical" className="mr-2 data-vertical:h-4 data-vertical:self-auto" />
+                        <Separator orientation="vertical" className="mr-2 h-4" />
                         <Breadcrumb>
                             <BreadcrumbList>
                                 <BreadcrumbItem>
@@ -83,39 +56,83 @@ export default function ResourcesPage() {
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator />
                                 <BreadcrumbItem>
-                                    <BreadcrumbPage>Your Resources</BreadcrumbPage>
+                                    <BreadcrumbPage>{isOwnProfile ? "Your Resources" : `@${username}'s Resources`}</BreadcrumbPage>
                                 </BreadcrumbItem>
                             </BreadcrumbList>
                         </Breadcrumb>
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-auto p-4 md:p-8 pt-0">
-                    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-                        <div className="flex flex-col gap-2">
-                            <h1 className="text-3xl font-bold tracking-tight">Your Resources</h1>
-                            <p className="text-muted-foreground">Browse all the study materials and documents you have shared.</p>
+                <main className="flex-1 overflow-auto p-6 md:p-10 pt-6">
+                    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                            <div className="space-y-1.5 text-center md:text-left">
+                                <h1 className="text-4xl font-extrabold tracking-tight">
+                                    {isOwnProfile ? "Your Resources" : `@${username}'s Resources`}
+                                </h1>
+                                <p className="text-muted-foreground font-medium">
+                                    {isOwnProfile 
+                                        ? "Manage and organize all your shared documents and study materials." 
+                                        : `Browse all resources shared by @${username}.`}
+                                </p>
+                            </div>
+                            
+                            {isOwnProfile && (
+                                <Button className="rounded-xl h-11 px-8 transition-all hover:shadow-xl hover:shadow-primary/20 shadow-md group" asChild>
+                                    <a href="/home">
+                                        <Plus className="size-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                                        Share New Resource
+                                    </a>
+                                </Button>
+                            )}
                         </div>
 
-                        {userResources.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
-                                {userResources.map(resource => (
+                        <div className="flex items-center gap-3 w-full max-w-md mx-auto md:mx-0">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                                <Input 
+                                    placeholder="Search resources..." 
+                                    className="pl-10 h-11 rounded-xl bg-background border-muted shadow-sm focus-visible:ring-primary"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                            <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl shadow-sm">
+                                <Filter className="size-4" />
+                            </Button>
+                        </div>
+
+                        {isLoading ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {[...Array(6)].map((_, i) => (
+                                    <Skeleton key={i} className="h-72 w-full rounded-2xl shadow-sm" />
+                                ))}
+                            </div>
+                        ) : filteredResources.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 pb-10">
+                                {filteredResources.map(resource => (
                                     <ResourceCard key={resource.id} resource={resource} />
                                 ))}
                             </div>
                         ) : (
-                            <Card className="border-dashed shadow-none max-w-2xl mx-auto w-full mt-8">
-                                <CardContent className="flex flex-col items-center justify-center h-64 text-center px-6">
-                                    <div className="rounded-full bg-muted p-4 mb-4">
-                                        <FileText className="h-8 w-8 text-muted-foreground" />
+                            <Card className="border-none bg-muted/20 shadow-none rounded-[2rem] overflow-hidden group max-w-3xl mx-auto w-full mt-10">
+                                <CardContent className="flex flex-col items-center justify-center py-20 text-center px-10">
+                                    <div className="rounded-full bg-background border-8 border-muted p-8 mb-8 transition-all group-hover:scale-110 group-hover:rotate-12 duration-500 shadow-sm">
+                                        <FileText className="h-14 w-14 text-muted-foreground/50" />
                                     </div>
-                                    <p className="font-medium text-lg">No resources shared yet</p>
-                                    <p className="text-sm text-muted-foreground mt-2 mb-6 max-w-sm">
-                                        You haven't uploaded any documents or study materials. Share your knowledge with the community!
+                                    <h3 className="text-2xl font-black mb-3">No resources found</h3>
+                                    <p className="text-muted-foreground max-w-sm mx-auto mb-10 leading-relaxed font-medium">
+                                        {searchQuery 
+                                            ? `We couldn't find any resources matching "${searchQuery}".`
+                                            : isOwnProfile 
+                                                ? "You haven't shared anything yet. Help your fellow students by uploading your study materials!" 
+                                                : `@${username} hasn't shared any resources yet.`}
                                     </p>
-                                    <Button className="cursor-pointer" asChild>
-                                        <a href="/home">Upload a Resource</a>
-                                    </Button>
+                                    {isOwnProfile && (
+                                        <Button className="rounded-2xl h-14 px-10 text-lg font-bold transition-all hover:scale-105 shadow-xl hover:shadow-primary/30" asChild>
+                                            <a href="/home">Start Sharing Now</a>
+                                        </Button>
+                                    )}
                                 </CardContent>
                             </Card>
                         )}

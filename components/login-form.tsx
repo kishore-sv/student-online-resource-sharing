@@ -37,7 +37,7 @@ export function LoginForm({
     setLoading(false);
     if (!error) {
       toast.success("Welcome back to StudyHub!");
-      router.push("/dashboard");
+      router.push("/home");
     } else {
       toast.error(error.message || "Invalid credentials");
     }
@@ -47,11 +47,11 @@ export function LoginForm({
     setSocialLoading(provider);
     const { error } = await signIn.social({
       provider,
-      callbackURL: "/dashboard",
+      callbackURL: "/home",
     });
     setSocialLoading(null);
     if (error) {
-        toast.error(error.message || `Failed to sign in with ${provider}`);
+      toast.error(error.message || `Failed to sign in with ${provider}`);
     }
   };
 
@@ -62,8 +62,8 @@ export function LoginForm({
           <form className="p-6 md:p-8" onSubmit={handleLogin}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mb-2">
-                    <IconBook className="w-6 h-6 text-primary" />
+                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mb-2">
+                  <IconBook className="w-6 h-6 text-primary" />
                 </div>
                 <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
                 <p className="text-balance text-muted-foreground text-sm">
@@ -91,12 +91,12 @@ export function LoginForm({
                     Forgot your password?
                   </Link>
                 </div>
-                <Input 
-                    id="password" 
-                    type="password" 
-                    required 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </Field>
               <Field>
@@ -108,12 +108,12 @@ export function LoginForm({
                 Or continue with
               </FieldSeparator>
               <div className="grid grid-cols-2 gap-4">
-                <Button 
-                    variant="outline" 
-                    type="button" 
-                    onClick={() => handleSocialLogin("google")}
-                    disabled={loading || !!socialLoading}
-                    className="cursor-pointer"
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => handleSocialLogin("google")}
+                  disabled={loading || !!socialLoading}
+                  className="cursor-pointer"
                 >
                   {socialLoading === "google" ? (
                     <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
@@ -122,12 +122,12 @@ export function LoginForm({
                   )}
                   Google
                 </Button>
-                <Button 
-                    variant="outline" 
-                    type="button" 
-                    onClick={() => handleSocialLogin("github")}
-                    disabled={loading || !!socialLoading}
-                    className="cursor-pointer"
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => handleSocialLogin("github")}
+                  disabled={loading || !!socialLoading}
+                  className="cursor-pointer"
                 >
                   {socialLoading === "github" ? (
                     <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />

@@ -25,22 +25,22 @@ import {
 import { toast } from "sonner"
 
 const COLLEGES = [
-    { label: "Presidency University", value: "presidency-university" },
-    { label: "RV University", value: "rv-university" },
-    { label: "REVA University", value: "reva-university" },
-    { label: "BMS College of Engineering", value: "bmsce" },
-    { label: "PES University", value: "pesu" },
-    { label: "MS Ramaiah Institute of Technology", value: "msrit" },
-    { label: "Dayananda Sagar College of Engineering", value: "dsce" },
-    { label: "Bangalore Institute of Technology", value: "bit" },
-    { label: "Vellore Institute of Technology (VIT)", value: "vit" },
-    { label: "Manipal Institute of Technology (MIT)", value: "mit" },
-    { label: "IIT Delhi", value: "iitd" },
-    { label: "IIT Bombay", value: "iitb" },
-    { label: "IIT Madras", value: "iitm" },
-    { label: "NIT Surathkal", value: "nits" },
-    { label: "BITS Pilani", value: "bits" },
-    { label: "Other", value: "other" },
+  { label: "Presidency University", value: "presidency-university" },
+  { label: "RV University", value: "rv-university" },
+  { label: "REVA University", value: "reva-university" },
+  { label: "BMS College of Engineering", value: "bmsce" },
+  { label: "PES University", value: "pesu" },
+  { label: "MS Ramaiah Institute of Technology", value: "msrit" },
+  { label: "Dayananda Sagar College of Engineering", value: "dsce" },
+  { label: "Bangalore Institute of Technology", value: "bit" },
+  { label: "Vellore Institute of Technology (VIT)", value: "vit" },
+  { label: "Manipal Institute of Technology (MIT)", value: "mit" },
+  { label: "IIT Delhi", value: "iitd" },
+  { label: "IIT Bombay", value: "iitb" },
+  { label: "IIT Madras", value: "iitm" },
+  { label: "NIT Surathkal", value: "nits" },
+  { label: "BITS Pilani", value: "bits" },
+  { label: "Other", value: "other" },
 ]
 
 export function SignupForm({
@@ -49,7 +49,7 @@ export function SignupForm({
 }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [collegeName, setCollegeName] = useState("");
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<"google" | "github" | null>(null);
@@ -58,25 +58,22 @@ export function SignupForm({
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!collegeName) {
-        toast.error("Please select a college");
-        return;
+      toast.error("Please select a college");
+      return;
     }
     setLoading(true);
     const { data, error } = await signUp.email({
       email,
       password,
-      name,
+      name: username, // Use username as name if fullName is not provided
+      username,
       collegeName,
     });
     setLoading(false);
     if (!error) {
-      // Manually send the OTP
-      await authClient.emailOtp.sendVerificationOtp({
-        email,
-        type: "email-verification",
-      });
-      toast.success("Account created! Check your email for verification code.");
-      router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+      toast.success("Account created! Redirecting to home...");
+      router.push("/home");
+      router.refresh();
     } else {
       toast.error(error.message || "An error occurred");
     }
@@ -86,11 +83,11 @@ export function SignupForm({
     setSocialLoading(provider);
     const { error } = await signIn.social({
       provider,
-      callbackURL: "/dashboard",
+      callbackURL: "/home",
     });
     setSocialLoading(null);
     if (error) {
-        toast.error(error.message || `Failed to sign up with ${provider}`);
+      toast.error(error.message || `Failed to sign up with ${provider}`);
     }
   };
 
@@ -101,8 +98,8 @@ export function SignupForm({
           <form className="p-6 md:p-8" onSubmit={handleSignup}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center mb-4">
-                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mb-2">
-                   <GraduationCap className="w-6 h-6 text-primary" />
+                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mb-2">
+                  <GraduationCap className="w-6 h-6 text-primary" />
                 </div>
                 <h1 className="text-2xl font-bold">Create your account</h1>
                 <p className="text-sm text-balance text-muted-foreground">
@@ -112,30 +109,30 @@ export function SignupForm({
 
               <div className="grid grid-cols-2 gap-4">
                 <Field>
-                    <FieldLabel htmlFor="name">Full Name</FieldLabel>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="John Doe"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
+                  <FieldLabel htmlFor="username">Username</FieldLabel>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="johndoe123"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
                 </Field>
                 <Field>
-                    <FieldLabel htmlFor="college">College Name</FieldLabel>
-                    <Select onValueChange={setCollegeName} required>
-                        <SelectTrigger id="college" className="w-full h-9">
-                            <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-56">
-                            {COLLEGES.map((college) => (
-                                <SelectItem key={college.value} value={college.label}>
-                                    {college.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                  <FieldLabel htmlFor="college">College Name</FieldLabel>
+                  <Select onValueChange={setCollegeName} required>
+                    <SelectTrigger id="college" className="w-full h-9">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-56">
+                      {COLLEGES.map((college) => (
+                        <SelectItem key={college.value} value={college.label}>
+                          {college.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </Field>
               </div>
 
@@ -153,15 +150,15 @@ export function SignupForm({
 
               <Field>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input 
-                    id="password" 
-                    type="password" 
-                    required 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <FieldDescription>
-                   At least 8 characters long.
+                  At least 8 characters long.
                 </FieldDescription>
               </Field>
 
@@ -174,12 +171,12 @@ export function SignupForm({
                 Or continue with
               </FieldSeparator>
               <div className="grid grid-cols-2 gap-4">
-                <Button 
-                    variant="outline" 
-                    type="button" 
-                    onClick={() => handleSocialSignup("google")}
-                    disabled={loading || !!socialLoading}
-                    className="cursor-pointer"
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => handleSocialSignup("google")}
+                  disabled={loading || !!socialLoading}
+                  className="cursor-pointer"
                 >
                   {socialLoading === "google" ? (
                     <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
@@ -188,12 +185,12 @@ export function SignupForm({
                   )}
                   Google
                 </Button>
-                <Button 
-                    variant="outline" 
-                    type="button" 
-                    onClick={() => handleSocialSignup("github")}
-                    disabled={loading || !!socialLoading}
-                    className="cursor-pointer"
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => handleSocialSignup("github")}
+                  disabled={loading || !!socialLoading}
+                  className="cursor-pointer"
                 >
                   {socialLoading === "github" ? (
                     <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
@@ -214,9 +211,9 @@ export function SignupForm({
               alt="Students study together"
               className="absolute inset-0 h-full w-full object-cover select-none brightness-75 transition-transform hover:scale-105 duration-700"
             />
-             <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
             <div className="absolute bottom-6 left-6 right-6 text-white text-sm font-medium">
-                "Empowering students through shared knowledge and collaboration."
+              "Empowering students through shared knowledge and collaboration."
             </div>
           </div>
         </CardContent>

@@ -17,92 +17,141 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { IconDots, IconFolder, IconPin, IconPinFilled, IconShare2, IconTrash } from "@tabler/icons-react"
+import { IconDots, IconFolder, IconPin, IconPinFilled, IconShare2, IconTrash, IconPlus } from "@tabler/icons-react"
+import Link from "next/link"
+import { deleteResource } from "@/lib/actions"
+import { toast } from "sonner"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Button } from "@/components/ui/button"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export function NavYourResources({
   resources,
   onTogglePin,
+  onDelete,
 }: {
-  resources: {
-    name: string
-    url: string
-    pinned?: boolean
-  }[]
-  onTogglePin?: (name: string) => void
+  resources: any[]
+  onTogglePin?: (id: string, currentState: boolean) => void
+  onDelete?: (id: string) => void
 }) {
   const { isMobile } = useSidebar()
 
   const sortedResources = [...resources].sort((a, b) => {
-    if (a.pinned && !b.pinned) return -1
-    if (!a.pinned && b.pinned) return 1
+    if (a.isPinned && !b.isPinned) return -1
+    if (!a.isPinned && b.isPinned) return 1
     return 0
   })
 
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+    <SidebarGroup>
       <SidebarGroupLabel>Your Resources</SidebarGroupLabel>
-      <div className="relative">
-        <ScrollArea className="h-[45vh] pr-4 translate-x-1">
-          <SidebarMenu>
-            {sortedResources.map((r) => (
-              <SidebarMenuItem key={r.name}>
+      <ScrollArea className="h-[45vh]">
+        <SidebarMenu>
+          {sortedResources.length > 0 ? (
+            sortedResources.map((r) => (
+              <SidebarMenuItem key={r.id}>
                 <SidebarMenuButton asChild>
-                  <a href={r.url}>
-                    {/* {r.icon} */}
-                    <span className="truncate w-42 flex items-center justify-between">{r.name} {r.pinned && <IconPinFilled className="size-4 text-muted-foreground" />} </span>
-                  </a>
+                  <Link href={`/resource/${r.id}`}>
+                    <span className="truncate">{r.title}</span>
+                    {r.isPinned && <IconPinFilled className="ml-auto size-4 text-muted-foreground" />}
+                  </Link>
                 </SidebarMenuButton>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <SidebarMenuAction
-                      showOnHover
-                      className="aria-expanded:bg-muted"
-                    >
-                      <IconDots
-                      />
+                    <SidebarMenuAction showOnHover>
+                      <IconDots />
                       <span className="sr-only">More</span>
                     </SidebarMenuAction>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
-                    className="w-48"
                     side={isMobile ? "bottom" : "right"}
                     align={isMobile ? "end" : "start"}
                   >
-                    <DropdownMenuItem onClick={() => onTogglePin?.(r.name)}>
-                      {r.pinned ? (
+                    <DropdownMenuItem onClick={() => onTogglePin?.(r.id, !!r.isPinned)}>
+                      {r.isPinned ? (
                         <>
-                          <IconPinFilled className="text-muted-foreground" />
-                          <span>Unpin Resource</span>
+                          <IconPinFilled className="mr-2 size-4" />
+                          <span>Unpin</span>
                         </>
                       ) : (
                         <>
-                          <IconPin className="text-muted-foreground" />
-                          <span>Pin Resource</span>
+                          <IconPin className="mr-2 size-4" />
+                          <span>Pin</span>
                         </>
                       )}
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <IconFolder className="text-muted-foreground" />
-                      <span>View Resource</span>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/resource/${r.id}`}>
+                        <IconFolder className="mr-2 size-4" />
+                        <span>View</span>
+                      </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <IconShare2 className="text-muted-foreground" />
-                      <span>Share Resource</span>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/resource/${r.id}`)
+                        toast.success("Link copied!")
+                      }}
+                    >
+                      <IconShare2 className="mr-2 size-4" />
+                      <span>Share</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <IconTrash className="text-muted-foreground" />
-                      <span>Delete Resource</span>
-                    </DropdownMenuItem>
+                    <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:text-destructive">
+                                  <IconTrash className="mr-2 size-4" />
+                                  <span>Delete</span>
+                              </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                              <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                      This will permanently delete this resource from your hub.
+                                  </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => onDelete?.(r.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                      Delete
+                                  </AlertDialogAction>
+                              </AlertDialogFooter>
+                          </AlertDialogContent>
+                      </AlertDialog>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </ScrollArea>
-        {/* Subtle Bottom Mask to indicate scroll */}
-        <div className="absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-sidebar to-transparent pointer-events-none z-10 opacity-70" />
-      </div>
+            ))
+          ) : (
+            <div className="px-4 py-8">
+              <EmptyState
+                title="No resources"
+                description="Your shared resources will appear here."
+                className="min-h-[150px] border-none bg-transparent p-0"
+                icon={IconFolder}
+                action={
+                  <Link href="/write-blog">
+                    <Button variant="outline" size="sm" className="w-full">
+                      <IconPlus className="mr-2 size-4" />
+                      Write Blog
+                    </Button>
+                  </Link>
+                }
+              />
+            </div>
+          )}
+        </SidebarMenu>
+      </ScrollArea>
     </SidebarGroup>
   )
 }

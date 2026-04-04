@@ -41,10 +41,9 @@ export default async function Navbar() {
                     <div className="flex items-center gap-4">
                         {session?.user ? (
                             <>
-                                <Link href="/dashboard">
+                                <Link href="/home">
                                     <Button size="lg" className="bg-primary hover:bg-primary/90 cursor-pointer">
-                                        Dashboard
-                                        <ArrowRight className="w-4 h-4 ml-2" />
+                                        Home
                                     </Button>
                                 </Link>
                                 <UserMenu user={{

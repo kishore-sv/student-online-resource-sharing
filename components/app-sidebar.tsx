@@ -15,10 +15,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { IconTerminal2, IconRobot, IconBook, IconSettings, IconLifebuoy, IconSend, IconFrame, IconChartPie, IconMap, IconCommand } from "@tabler/icons-react"
+import { IconTerminal2, IconRobot, IconBook, IconSettings, IconLifebuoy, IconSend, IconFrame, IconChartPie, IconMap, IconCommand, IconFolder, IconUpload } from "@tabler/icons-react"
 import { authClient } from "@/lib/auth-client"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Home, Pencil } from "lucide-react"
+import { getResourcesByUser } from "@/lib/db/queries"
+import { togglePin, deleteResource } from "@/lib/actions"
+import { toast } from "sonner"
 
 const data = {
   user: {
@@ -72,58 +75,40 @@ const data = {
       //   },
       // ],
     },
-    // {
-    //   title: "Documentation",
-    //   url: "#",
-    //   icon: (
-    //     <IconBook
-    //     />
-    //   ),
-    //   items: [
-    //     {
-    //       title: "Introduction",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Get Started",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Tutorials",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Changelog",
-    //       url: "#",
-    //     },
-    //   ],
-    // },
-    // {
-    //   title: "Settings",
-    //   url: "#",
-    //   icon: (
-    //     <IconSettings
-    //     />
-    //   ),
-    //   items: [
-    //     {
-    //       title: "General",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Team",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Billing",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Limits",
-    //       url: "#",
-    //     },
-    //   ],
-    // },
+    {
+      title: "Upload Resources",
+      url: "",
+      icon: (
+        <IconUpload
+        />
+      ),
+    },
+    {
+      title: "Settings",
+      url: "#",
+      icon: (
+        <IconSettings
+        />
+      ),
+      items: [
+        {
+          title: "General",
+          url: "#",
+        },
+        {
+          title: "Team",
+          url: "#",
+        },
+        {
+          title: "Billing",
+          url: "#",
+        },
+        {
+          title: "Limits",
+          url: "#",
+        },
+      ],
+    },
   ],
   navSecondary: [
     {
@@ -135,63 +120,29 @@ const data = {
       ),
     },
   ],
-  yourResources: [
-    {
-      name: "Java Notes",
-      url: "#",
-      pinned: true
-    },
-    {
-      name: "DBMS pptx",
-      url: "#",
-    },
-    {
-      name: "CP Programs",
-      url: "#",
-    },
-    {
-      name: "Advanced java",
-      url: "#",
-    },
-    {
-      name: "Java Full stack notes with programs",
-      url: "#",
-    },
-    {
-      name: "React notes",
-      url: "#",
-    },
-    {
-      name: "OS notes",
-      url: "#",
-    },
-    {
-      name: "Phy3001 annonucemt",
-      url: "#",
-    },
-    {
-      name: "Python notes",
-      url: "#",
-    },
-    {
-      name: "Express notes",
-      url: "#",
-    },
-    {
-      name: "Phy3001 pdf",
-      url: "#",
-    },
-    {
-      name: "Cryptography",
-      url: "#",
-    },
-  ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session, isPending } = authClient.useSession()
   const user = session?.user
-  const [resources, setResources] = React.useState(data.yourResources)
+  const [resources, setResources] = React.useState<any[]>([])
+
+  React.useEffect(() => {
+    if (user?.username) {
+      getResourcesByUser(user.username).then(setResources)
+    }
+  }, [user?.username])
+
+  const handleTogglePin = async (resourceId: string, currentState: boolean) => {
+    setResources(prev => prev.map(r => r.id === resourceId ? { ...r, isPinned: !currentState } : r))
+    await togglePin(resourceId, currentState)
+  }
+
+  const handleDelete = async (resourceId: string) => {
+    setResources(prev => prev.filter(r => r.id !== resourceId))
+    await deleteResource(resourceId)
+    toast.success("Resource deleted successfully")
+  }
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -216,9 +167,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
         <NavYourResources
           resources={resources}
-          onTogglePin={(name) => {
-            setResources(prev => prev.map(r => r.name === name ? { ...r, pinned: !r.pinned } : r))
-          }}
+          onTogglePin={handleTogglePin}
+          onDelete={handleDelete}
         />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
@@ -234,6 +184,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ) : user ? (
           <NavUser user={{
             name: user.name,
+            username: user.username,
             email: user.email,
             avatar: user.image || "",
           }} />
