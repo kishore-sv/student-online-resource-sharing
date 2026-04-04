@@ -63,7 +63,7 @@ export default function UserMenu({ user }: Props) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push("/profile")} className="cursor-pointer">
+        <DropdownMenuItem onClick={() => router.push(`${user.name}/profile`)} className="cursor-pointer">
           <IconUser className="mr-2 h-4 w-4" />
           <span>Profile</span>
         </DropdownMenuItem>

@@ -20,7 +20,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { IconSelector, IconSparkles, IconRosetteDiscountCheck, IconCreditCard, IconBell, IconLogout, IconUser, IconRss, IconSun, IconBrightness, IconFolder } from "@tabler/icons-react"
+import { IconSelector, IconSparkles, IconRosetteDiscountCheck, IconCreditCard, IconBell, IconLogout, IconUser, IconRss, IconSun, IconBrightness, IconFolder, IconBookmark } from "@tabler/icons-react"
 import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
@@ -103,6 +103,13 @@ export function NavUser({
                   <IconFolder
                   />
                   View Resources
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <a href="/saved" className="flex items-center gap-1 w-full">
+                  <IconBookmark
+                  />
+                  Saved Resources
                 </a>
               </DropdownMenuItem>
             </DropdownMenuGroup>

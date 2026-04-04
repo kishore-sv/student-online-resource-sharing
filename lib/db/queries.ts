@@ -1,6 +1,6 @@
 "use server"
 import { db } from "./index";
-import { resource, user, like, comment } from "./schema";
+import { resource, user, like, comment, savedResource } from "./schema";
 import { desc, eq, sql, and, ilike } from "drizzle-orm";
 
 export async function getPublicResources(limit = 10) {
@@ -10,6 +10,8 @@ export async function getPublicResources(limit = 10) {
             author: true,
             likes: true,
             comments: true,
+            savedResources: true,
+            files: true,
         },
         orderBy: [desc(resource.createdAt)],
         limit,
@@ -22,6 +24,8 @@ export async function getResourceById(id: string) {
         with: {
             author: true,
             likes: true,
+            savedResources: true,
+            files: true,
             comments: {
                 with: {
                     author: true
@@ -44,6 +48,7 @@ export async function getResourcesByUser(username: string) {
         with: {
             author: true,
             likes: true,
+            files: true,
             comments: {
                 with: {
                     author: true
@@ -65,4 +70,22 @@ export async function getUserByUsername(username: string) {
     return await db.query.user.findFirst({
         where: eq(user.username, username)
     });
+}
+
+export async function getSavedResources(userId: string) {
+    const saved = await db.query.savedResource.findMany({
+        where: eq(savedResource.userId, userId),
+        with: {
+            resource: {
+                with: {
+                    author: true,
+                    likes: true,
+                    comments: true,
+                    files: true,
+                }
+            }
+        },
+        orderBy: [desc(savedResource.createdAt)],
+    });
+    return saved.map(s => s.resource);
 }

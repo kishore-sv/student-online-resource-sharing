@@ -15,109 +15,34 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { IconTerminal2, IconRobot, IconBook, IconSettings, IconLifebuoy, IconSend, IconFrame, IconChartPie, IconMap, IconCommand, IconFolder, IconUpload } from "@tabler/icons-react"
+import { IconBook, IconSend, IconUpload } from "@tabler/icons-react"
 import { authClient } from "@/lib/auth-client"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Home, Pencil } from "lucide-react"
 import { getResourcesByUser } from "@/lib/db/queries"
 import { togglePin, deleteResource } from "@/lib/actions"
 import { toast } from "sonner"
+import { UploadResourceDialog } from "@/components/upload-resource-dialog"
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Home",
       url: "/home",
-      icon: (
-        <Home
-        />
-      ),
+      icon: (<Home />),
       isActive: true,
-      // items: [
-      //   {
-      //     title: "History",
-      //     url: "#",
-      //   },
-      //   {
-      //     title: "Starred",
-      //     url: "#",
-      //   },
-      //   {
-      //     title: "Settings",
-      //     url: "#",
-      //   },
-      // ],
     },
     {
       title: "Write Blog",
       url: "/write-blog",
-      icon: (
-        <Pencil
-        />
-      ),
-      // items: [
-      //   {
-      //     title: "Genesis",
-      //     url: "#",
-      //   },
-      //   {
-      //     title: "Explorer",
-      //     url: "#",
-      //   },
-      //   {
-      //     title: "Quantum",
-      //     url: "#",
-      //   },
-      // ],
-    },
-    {
-      title: "Upload Resources",
-      url: "",
-      icon: (
-        <IconUpload
-        />
-      ),
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: (
-        <IconSettings
-        />
-      ),
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
+      icon: (<Pencil />),
     },
   ],
   navSecondary: [
     {
       title: "Feedback",
       url: "#",
-      icon: (
-        <IconSend
-        />
-      ),
+      icon: (<IconSend />),
     },
   ],
 }
@@ -126,10 +51,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session, isPending } = authClient.useSession()
   const user = session?.user
   const [resources, setResources] = React.useState<any[]>([])
+  const [isLoadingResources, setIsLoadingResources] = React.useState(false)
+  const [isUploadOpen, setIsUploadOpen] = React.useState(false)
 
   React.useEffect(() => {
     if (user?.username) {
-      getResourcesByUser(user.username).then(setResources)
+      setIsLoadingResources(true)
+      getResourcesByUser(user.username).then((res) => {
+        setResources(res)
+        setIsLoadingResources(false)
+      })
     }
   }, [user?.username])
 
@@ -150,7 +81,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <a href="/home">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <IconBook className="size-4" />
                 </div>
@@ -164,9 +95,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={[
+          ...data.navMain,
+          {
+            title: "Upload Resources",
+            url: "#",
+            icon: (<IconUpload />),
+            onClick: () => setIsUploadOpen(true),
+          },
+        ]} />
         <NavYourResources
           resources={resources}
+          isLoading={isLoadingResources}
           onTogglePin={handleTogglePin}
           onDelete={handleDelete}
         />
@@ -190,6 +130,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           }} />
         ) : null}
       </SidebarFooter>
+      <UploadResourceDialog open={isUploadOpen} onOpenChange={setIsUploadOpen} />
     </Sidebar>
   )
 }

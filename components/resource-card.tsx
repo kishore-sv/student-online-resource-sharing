@@ -5,7 +5,7 @@ import { Dot, Heart, MessageSquare, Share2, FileText, Bookmark, MoreVertical, Pe
 import Link from "next/link"
 import { toast } from "sonner"
 import { authClient } from "@/lib/auth-client"
-import { toggleLike, togglePin, deleteResource } from "@/lib/actions"
+import { toggleLike, togglePin, deleteResource, toggleSave } from "@/lib/actions"
 import { useState } from "react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { formatDistanceToNow } from "date-fns"
@@ -41,6 +41,7 @@ export type ResourceCardProps = {
   }
   likes?: any[]
   comments?: any[]
+  savedResources?: any[]
 }
 
 export function ResourceCard({ resource }: { resource: ResourceCardProps }) {
@@ -48,6 +49,7 @@ export function ResourceCard({ resource }: { resource: ResourceCardProps }) {
   const isOwner = session?.user?.id === resource.authorId
   const [isLiked, setIsLiked] = useState(resource.likes?.some(l => l.authorId === session?.user?.id))
   const [likesCount, setLikesCount] = useState(resource.likes?.length || 0)
+  const [isSaved, setIsSaved] = useState(resource.savedResources?.some(s => s.userId === session?.user?.id) || false)
 
   const handleLike = async () => {
     if (!session?.user) {
@@ -81,7 +83,13 @@ export function ResourceCard({ resource }: { resource: ResourceCardProps }) {
     <Card key={resource.id} className="group overflow-hidden border-border/50 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 flex flex-col rounded-3xl bg-card/50 backdrop-blur-sm">
       <div className="relative aspect-video w-full overflow-hidden bg-muted">
         <Link href={`/resource/${resource.id}`} className="block h-full">
-            {resource.category === "file" && resource.url ? (
+            {resource.url ? (
+                <img
+                    src={resource.url}
+                    alt={resource.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+            ) : resource.category === "file" ? (
                 <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-primary/10 to-blue-500/10 group-hover:scale-110 transition-transform duration-700">
                     <FileText className="w-16 h-16 text-primary/30" />
                 </div>
@@ -218,14 +226,19 @@ export function ResourceCard({ resource }: { resource: ResourceCardProps }) {
         <Tooltip>
             <TooltipTrigger asChild>
                 <button 
-                    onClick={() => toast.info("Coming soon!")}
-                    className="flex items-center active:scale-90 text-muted-foreground hover:text-orange-500 transition-all cursor-pointer rounded-full h-8 w-8 items-center justify-center hover:bg-orange-500/10"
+                    onClick={async () => {
+                        if (!session?.user) { toast.error("Please login to save"); return; }
+                        setIsSaved(!isSaved);
+                        await toggleSave(resource.id, session.user.id);
+                        toast.success(isSaved ? "Removed from saved" : "Saved!");
+                    }}
+                    className={`flex items-center active:scale-90 transition-all cursor-pointer rounded-full h-8 w-8 items-center justify-center ${isSaved ? 'text-orange-500 hover:bg-orange-500/10' : 'text-muted-foreground hover:text-orange-500 hover:bg-orange-500/10'}`}
                 >
-                    <Bookmark className="w-4.5 h-4.5" />
+                    <Bookmark className={`w-4.5 h-4.5 ${isSaved ? 'fill-current' : ''}`} />
                 </button>
             </TooltipTrigger>
             <TooltipContent className="rounded-xl font-bold bg-foreground text-background border-none">
-                <p>Bookmark</p>
+                <p>{isSaved ? 'Unsave' : 'Save'}</p>
             </TooltipContent>
         </Tooltip>
       </CardFooter>

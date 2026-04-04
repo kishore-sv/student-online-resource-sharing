@@ -14,8 +14,6 @@ export const user = pgTable("user", {
 	image: text("image"),
 	createdAt: timestamp("createdAt").notNull(),
 	updatedAt: timestamp("updatedAt").notNull(),
-
-	// Custom Student Fields
 	collegeName: text("college_name"),
 });
 
@@ -61,14 +59,24 @@ export const resource = pgTable("resource", {
 	description: text("description"),
 	category: resourceCategoryEnum("category").notNull().default("file"),
 	visibility: visibilityEnum("visibility").notNull().default("public"),
-	url: text("url"), // Null for blogs, used for file location
-	content: text("content"), // Markdown/Text for blogs
+	url: text("url"),
+	content: text("content"),
 	tags: text("tags").array(),
-	metadata: text("metadata"), // Stringified JSON or separate fields? Let's use simple fields for now or text for flexibility
+	metadata: text("metadata"), 
 	authorId: text("author_id").notNull().references(() => user.id, { onDelete: "cascade" }),
 	isPinned: boolean("is_pinned").default(false).notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const resourceFile = pgTable("resource_file", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	resourceId: uuid("resource_id").notNull().references(() => resource.id, { onDelete: "cascade" }),
+	name: text("name").notNull(),
+	url: text("url").notNull(),
+	size: text("size"),
+	type: text("type"),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const like = pgTable("like", {
@@ -86,6 +94,13 @@ export const comment = pgTable("comment", {
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const savedResource = pgTable("saved_resource", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+	resourceId: uuid("resource_id").notNull().references(() => resource.id, { onDelete: "cascade" }),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const permission = pgTable("permission", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	resourceId: uuid("resource_id").references(() => resource.id, { onDelete: "cascade" }),
@@ -94,11 +109,11 @@ export const permission = pgTable("permission", {
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Relationships
 export const userRelations = relations(user, ({ many }) => ({
 	resources: many(resource),
 	likes: many(like),
 	comments: many(comment),
+	savedResources: many(savedResource),
 	permissionsRecieved: many(permission, { relationName: "sharedWith" }),
 }));
 
@@ -109,7 +124,16 @@ export const resourceRelations = relations(resource, ({ one, many }) => ({
 	}),
 	likes: many(like),
 	comments: many(comment),
+	savedResources: many(savedResource),
+	files: many(resourceFile),
 	permissions: many(permission),
+}));
+
+export const resourceFileRelations = relations(resourceFile, ({ one }) => ({
+	resource: one(resource, {
+		fields: [resourceFile.resourceId],
+		references: [resource.id],
+	}),
 }));
 
 export const likeRelations = relations(like, ({ one }) => ({
@@ -130,6 +154,17 @@ export const commentRelations = relations(comment, ({ one }) => ({
 	}),
 	resource: one(resource, {
 		fields: [comment.resourceId],
+		references: [resource.id],
+	}),
+}));
+
+export const savedResourceRelations = relations(savedResource, ({ one }) => ({
+	user: one(user, {
+		fields: [savedResource.userId],
+		references: [user.id],
+	}),
+	resource: one(resource, {
+		fields: [savedResource.resourceId],
 		references: [resource.id],
 	}),
 }));

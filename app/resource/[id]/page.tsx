@@ -9,39 +9,34 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Heart, MessageSquare, Share2, Bookmark, Download, ChevronLeft, ChevronRight, Share, Users, Code, MoreHorizontal, Save, FileText, Send, X, Shield, Pencil, Eye, Globe, Lock, Trash } from "lucide-react"
+import { Heart, Share2, Bookmark, FileText, Globe, Lock, Trash } from "lucide-react"
 import Link from "next/link"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
 import { authClient } from "@/lib/auth-client"
 import { getResourceById } from "@/lib/db/queries"
-import { toggleLike, postComment, deleteResource } from "@/lib/actions"
+import { toggleLike, postComment, deleteResource, toggleSave } from "@/lib/actions"
 import { formatDistanceToNow } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
+import { IconDownload, IconFileText } from "@tabler/icons-react"
 
 export default function SingleResourcePage() {
     const { id } = useParams()
     const router = useRouter()
     const { data: session } = authClient.useSession()
 
-    const [currentSlide, setCurrentSlide] = useState(0)
     const [newComment, setNewComment] = useState("")
     const [resource, setResource] = useState<any>(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -55,6 +50,7 @@ export default function SingleResourcePage() {
                 if (data) {
                     setResource(data)
                     setLiked(data.likes?.some((l: any) => l.authorId === session?.user?.id))
+                    setSaved(data.savedResources?.some((s: any) => s.userId === session?.user?.id))
                 }
                 setIsLoading(false)
             }
@@ -93,10 +89,6 @@ export default function SingleResourcePage() {
             </div>
         )
     }
-
-    const slides = resource.url ? [resource.url] : []
-    const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length)
-    const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
 
     const handleToggleLike = async () => {
         if (!session?.user) {
@@ -187,12 +179,17 @@ export default function SingleResourcePage() {
                         <div className="lg:col-span-8 flex flex-col gap-6">
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between gap-4">
-                                    <div className="flex items-center gap-2">
-                                        <Link href={`/${resource.author.username}/profile`} className="font-semibold hover:underline">
-                                            @{resource.author.username}
-                                        </Link>
-                                    </div>
-                                    <div className="flex items-center gap-2">
+                                    <Link href={`/${resource.author.username}/profile`} className="flex items-center gap-3 group">
+                                        <Avatar className="size-9 border">
+                                            <AvatarImage src={resource.author.image || ""} />
+                                            <AvatarFallback>{resource.author.name?.[0] || "U"}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-semibold group-hover:underline">{resource.author.name}</span>
+                                            <span className="text-xs text-muted-foreground">@{resource.author.username}</span>
+                                        </div>
+                                    </Link>
+                                    <div className="flex items-center gap-2 flex-wrap justify-end">
                                         {resource.tags?.map((tag: string) => (
                                             <Badge key={tag} variant="secondary" className="text-[10px]">#{tag}</Badge>
                                         ))}
@@ -209,9 +206,21 @@ export default function SingleResourcePage() {
                                 <p className="text-muted-foreground">{resource.description || "No description provided."}</p>
                             </div>
 
-                            <div className="flex items-center gap-2 border-y py-4">
+                            <div className="flex items-center gap-2 border-y py-4 flex-wrap">
                                 <Button variant={liked ? "default" : "outline"} size="sm" onClick={handleToggleLike}>
                                     <Heart className={cn("size-4 mr-2", liked && "fill-current")} /> {resource.likes?.length || 0}
+                                </Button>
+                                <Button
+                                    variant={saved ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={async () => {
+                                        if (!session?.user) { toast.error("Login required"); return; }
+                                        setSaved(!saved);
+                                        await toggleSave(resource.id, session.user.id);
+                                        toast.success(saved ? "Removed from saved" : "Saved!");
+                                    }}
+                                >
+                                    <Bookmark className={cn("size-4 mr-2", saved && "fill-current")} /> {saved ? "Saved" : "Save"}
                                 </Button>
                                 <Button variant="outline" size="sm" onClick={() => {
                                     navigator.clipboard.writeText(window.location.href);
@@ -219,31 +228,68 @@ export default function SingleResourcePage() {
                                 }}>
                                     <Share2 className="size-4 mr-2" /> Share
                                 </Button>
-                                <div className="ml-auto">
-                                    <Button variant="default" size="sm">
-                                        <Download className="size-4 mr-2" /> Download
-                                    </Button>
-                                </div>
                             </div>
 
-                            <div className="border rounded-md overflow-hidden bg-muted/40">
-                                {resource.category === "blog" ? (
-                                    <div className="p-8 prose dark:prose-invert max-w-none">
-                                        {resource.content || "No content."}
-                                    </div>
-                                ) : (
-                                    <div className="relative aspect-video flex items-center justify-center bg-zinc-950">
-                                        {slides.length > 0 ? (
-                                            <img src={slides[currentSlide]} className="h-full w-full object-contain" />
-                                        ) : (
-                                            <div className="text-muted-foreground/30 flex flex-col items-center gap-2">
-                                                <FileText className="size-16" />
-                                                <span className="text-xs uppercase font-bold tracking-widest">No preview</span>
+                            {resource.files && resource.files.length > 0 && (
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Attached Files ({resource.files.length})</h3>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {resource.files.map((file: any) => (
+                                            <div key={file.id} className="flex items-center justify-between p-3 border rounded-xl bg-muted/20 hover:bg-muted/40 transition-colors group">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                                                        <IconFileText className="size-5" />
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-medium line-clamp-1">{file.name}</span>
+                                                        <span className="text-[10px] text-muted-foreground uppercase">{file.size || "Unknown size"} • {file.type?.split('/')[1] || "File"}</span>
+                                                    </div>
+                                                </div>
+                                                <a href={file.url} download={file.name} target="_blank" rel="noreferrer">
+                                                    <Button variant="ghost" size="icon" className="group-hover:text-primary">
+                                                        <IconDownload className="size-4" />
+                                                    </Button>
+                                                </a>
                                             </div>
-                                        )}
+                                        ))}
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
+
+                            {resource.category === "blog" ? (
+                                <div className="space-y-6">
+                                    {resource.url && (
+                                        <div className="border rounded-md overflow-hidden">
+                                            <img src={resource.url} alt={resource.title} className="w-full aspect-video object-cover" />
+                                        </div>
+                                    )}
+                                    <div className="border rounded-md overflow-hidden bg-muted/40">
+                                        <div
+                                            className="p-8 prose dark:prose-invert max-w-none prose-pre:bg-zinc-950 prose-pre:text-zinc-100 prose-code:before:content-none prose-code:after:content-none"
+                                            dangerouslySetInnerHTML={{ __html: resource.content || "<p>No content.</p>" }}
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="border rounded-md overflow-hidden bg-muted/40">
+                                    {(resource.files?.[0]?.url || resource.url) ? (
+                                        <div className="flex flex-col">
+                                            <iframe
+                                                src={`https://docs.google.com/viewer?url=${encodeURIComponent(resource.files?.[0]?.url || resource.url)}&embedded=true`}
+                                                className="w-full border-0"
+                                                style={{ minHeight: "80vh" }}
+                                                title="Document Viewer"
+                                                allowFullScreen
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="aspect-video flex flex-col items-center justify-center gap-2 text-muted-foreground/30">
+                                            <FileText className="size-16" />
+                                            <span className="text-xs uppercase font-bold tracking-widest">No file uploaded</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             <Card className="rounded-md overflow-hidden border">
                                 <CardHeader className="bg-muted/30 border-b">
@@ -251,10 +297,10 @@ export default function SingleResourcePage() {
                                 </CardHeader>
                                 <CardContent className="p-6 space-y-6">
                                     <div className="space-y-4">
-                                        <Textarea 
-                                            placeholder="Add your thoughts..." 
-                                            value={newComment} 
-                                            onChange={e => setNewComment(e.target.value)} 
+                                        <Textarea
+                                            placeholder="Add your thoughts..."
+                                            value={newComment}
+                                            onChange={e => setNewComment(e.target.value)}
                                             className="min-h-[100px]"
                                         />
                                         <div className="flex justify-end">

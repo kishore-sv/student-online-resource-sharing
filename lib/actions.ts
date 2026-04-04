@@ -1,6 +1,6 @@
 "use server"
 import { db } from "./db";
-import { resource, like, comment, user } from "./db/schema";
+import { resource, like, comment, user, savedResource, resourceFile } from "./db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { uploadImage } from "./imagekit";
@@ -14,11 +14,22 @@ export async function createResource(data: {
     content?: string;
     authorId: string;
     tags?: string[];
+    files?: { name: string; url: string; size?: string; type?: string }[];
 }) {
+    const { files, ...resourceData } = data;
     const [newResource] = await db.insert(resource).values({
-        ...data,
+        ...resourceData,
         updatedAt: new Date(),
     }).returning();
+    
+    if (files && files.length > 0) {
+        await db.insert(resourceFile).values(
+            files.map(file => ({
+                resourceId: newResource.id,
+                ...file
+            }))
+        );
+    }
     
     revalidatePath("/home");
     revalidatePath("/feed");
@@ -92,4 +103,19 @@ export async function uploadBlogThumbnail(arg1: FormData | string, arg2?: string
     const buffer = Buffer.from(base64Image.split(",")[1], "base64");
     const url = await uploadImage(buffer, fileName || "image.png", "/blogs/thumbnails");
     return url as string;
+}
+
+export async function toggleSave(resourceId: string, userId: string) {
+    const existing = await db.query.savedResource.findFirst({
+        where: and(eq(savedResource.resourceId, resourceId), eq(savedResource.userId, userId))
+    });
+
+    if (existing) {
+        await db.delete(savedResource).where(eq(savedResource.id, existing.id));
+    } else {
+        await db.insert(savedResource).values({ resourceId, userId });
+    }
+
+    revalidatePath(`/resource/${resourceId}`);
+    revalidatePath("/saved");
 }

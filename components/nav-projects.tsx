@@ -23,6 +23,7 @@ import { deleteResource } from "@/lib/actions"
 import { toast } from "sonner"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -37,10 +38,12 @@ import {
 
 export function NavYourResources({
   resources,
+  isLoading,
   onTogglePin,
   onDelete,
 }: {
   resources: any[]
+  isLoading?: boolean
   onTogglePin?: (id: string, currentState: boolean) => void
   onDelete?: (id: string) => void
 }) {
@@ -57,7 +60,9 @@ export function NavYourResources({
       <SidebarGroupLabel>Your Resources</SidebarGroupLabel>
       <ScrollArea className="h-[45vh]">
         <SidebarMenu>
-          {sortedResources.length > 0 ? (
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, i) => <NavYourResourcesSkeleton key={i} />)
+          ) : sortedResources.length > 0 ? (
             sortedResources.map((r) => (
               <SidebarMenuItem key={r.id}>
                 <SidebarMenuButton asChild>
@@ -153,5 +158,16 @@ export function NavYourResources({
         </SidebarMenu>
       </ScrollArea>
     </SidebarGroup>
+  )
+}
+
+function NavYourResourcesSkeleton() {
+  return (
+    <SidebarMenuItem>
+      <div className="flex items-center gap-2 px-3 py-2">
+        <Skeleton className="h-4 w-4 rounded-full" />
+        <Skeleton className="h-4 flex-1" />
+      </div>
+    </SidebarMenuItem>
   )
 }
