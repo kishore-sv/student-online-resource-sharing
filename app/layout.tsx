@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import NavBar from "@/components/nav-bar";
+import Footer from "@/components/footer";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -9,9 +11,28 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Student Online Resource Sharing",
-  description: "Student Online Resource Sharing",
-};
+  title: 'StudyHub - Share Knowledge, Learn Together',
+  description: 'A collaborative platform for students to share and discover educational resources',
+  generator: 'v0.app',
+  icons: {
+    icon: [
+      {
+        url: '/icon-light-32x32.png',
+        media: '(prefers-color-scheme: light)',
+      },
+      {
+        url: '/icon-dark-32x32.png',
+        media: '(prefers-color-scheme: dark)',
+      },
+      {
+        url: '/icon.svg',
+        type: 'image/svg+xml',
+      },
+    ],
+    apple: '/apple-icon.png',
+  },
+}
+
 
 export default function RootLayout({
   children,
