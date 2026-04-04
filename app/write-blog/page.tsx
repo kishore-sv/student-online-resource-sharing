@@ -126,8 +126,17 @@ const MenuBar = ({ editor }: { editor: any }) => {
 const CodeBlockComponent = ({ node, updateAttributes }: { node: any, updateAttributes: any }) => {
   const filename = node.attrs.filename || ""
   const language = node.attrs.language || "auto"
+  const [copied, setCopied] = React.useState(false)
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(node.content.textContent)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+    toast.success("Code copied to clipboard")
+  }
+
   return (
-    <NodeViewWrapper className="my-6 border rounded-md overflow-hidden bg-muted/40">
+    <NodeViewWrapper className="my-6 border rounded-md overflow-hidden bg-muted/40 group/code">
       <div className="flex items-center gap-2 px-3 py-1.5 border-b bg-muted/60">
         <div className="flex-1 flex items-center gap-2">
           {getIconForFile(filename, language)}
@@ -138,17 +147,25 @@ const CodeBlockComponent = ({ node, updateAttributes }: { node: any, updateAttri
             onChange={e => updateAttributes({ filename: e.target.value })}
           />
         </div>
-        <select
-          className="bg-transparent border-none text-[10px] uppercase font-bold focus:ring-0 outline-none"
-          value={language}
-          onChange={e => updateAttributes({ language: e.target.value })}
-        >
-          <option value="auto">Auto</option>
-          <option value="javascript">JS</option>
-          <option value="typescript">TS</option>
-          <option value="python">Python</option>
-          <option value="java">Java</option>
-        </select>
+        <div className="flex items-center gap-2">
+          <select
+            className="bg-transparent border-none text-[10px] uppercase font-bold focus:ring-0 outline-none opacity-50 hover:opacity-100 transition-opacity"
+            value={language}
+            onChange={e => updateAttributes({ language: e.target.value })}
+          >
+            <option value="auto">Auto</option>
+            <option value="javascript">JS</option>
+            <option value="typescript">TS</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+          </select>
+          <button
+            onClick={handleCopy}
+            className="p-1 hover:bg-muted rounded transition-colors"
+          >
+            {copied ? <CheckCircle2 className="size-3 text-green-500" /> : <Code className="size-3" />}
+          </button>
+        </div>
       </div>
       <pre className="p-4 bg-zinc-950 text-zinc-100">
         <NodeViewContent className="font-mono text-sm" />
@@ -177,7 +194,19 @@ export default function WriteBlog() {
       Link,
       Image,
       CodeBlockLowlight.extend({
-        addAttributes() { return { ...this.parent?.(), filename: { default: null } } },
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            filename: {
+              default: null,
+              parseHTML: element => element.getAttribute('data-filename'),
+              renderHTML: attributes => {
+                if (!attributes.filename) return {}
+                return { 'data-filename': attributes.filename }
+              },
+            },
+          }
+        },
         addNodeView() { return ReactNodeViewRenderer(CodeBlockComponent) },
       }).configure({ lowlight }),
       Placeholder.configure({ placeholder: "Write your blog..." }),

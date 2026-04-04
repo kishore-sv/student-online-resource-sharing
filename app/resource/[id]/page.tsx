@@ -31,6 +31,7 @@ import { formatDistanceToNow } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { IconDownload, IconFileText } from "@tabler/icons-react"
+import { BlogViewer } from "@/components/blog-viewer"
 
 export default function SingleResourcePage() {
     const { id } = useParams()
@@ -265,10 +266,9 @@ export default function SingleResourcePage() {
                                         </div>
                                     )}
                                     <div className="border rounded-md overflow-hidden bg-muted/40">
-                                        <div
-                                            className="p-8 prose dark:prose-invert max-w-none prose-pre:bg-zinc-950 prose-pre:text-zinc-100 prose-code:before:content-none prose-code:after:content-none"
-                                            dangerouslySetInnerHTML={{ __html: resource.content || "<p>No content.</p>" }}
-                                        />
+                                        <div className="p-8">
+                                            <BlogViewer content={resource.content || "<p>No content.</p>"} />
+                                        </div>
                                     </div>
                                 </div>
                             ) : (
