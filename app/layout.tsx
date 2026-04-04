@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     description: 'A collaborative platform for students to share and discover educational resources.',
     images: [
       {
-        url: '/og-image.png', // Replace with real OG image eventually
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: 'StudyHub',
