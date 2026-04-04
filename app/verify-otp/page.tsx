@@ -98,7 +98,7 @@ function VerifyOtpContent() {
                   </InputOTPGroup>
                 </InputOTP>
               </div>
-              <Button type="submit" className="w-full h-12 text-base font-medium shadow-md shadow-primary/10" disabled={loading}>
+              <Button type="submit" className="w-full h-12 cursor-pointer text-base font-medium shadow-md shadow-primary/10" disabled={loading}>
                 {loading ? (
                   <div className="flex items-center gap-2">
                     <div className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />

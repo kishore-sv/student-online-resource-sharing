@@ -11,9 +11,42 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'StudyHub - Share Knowledge, Learn Together',
-  description: 'A collaborative platform for students to share and discover educational resources',
-  generator: 'v0.app',
+  title: {
+    default: 'StudyHub - Share Knowledge, Learn Together',
+    template: '%s | StudyHub'
+  },
+  description: 'A collaborative platform for students to share and discover educational resources. Upload notes, write blogs, and learn together.',
+  keywords: ['StudyHub', 'notes sharing', 'student resources', 'education platform', 'collaborative learning', 'academic blogs'],
+  metadataBase: new URL('https://resoure.kishore-sv.me'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://resoure.kishore-sv.me',
+    siteName: 'StudyHub',
+    title: 'StudyHub - Share Knowledge, Learn Together',
+    description: 'A collaborative platform for students to share and discover educational resources.',
+    images: [
+      {
+        url: '/og-image.png', // Replace with real OG image eventually
+        width: 1200,
+        height: 630,
+        alt: 'StudyHub',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'StudyHub - Share Knowledge, Learn Together',
+    description: 'A collaborative platform for students to share and discover educational resources.',
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   icons: {
     icon: [
       {

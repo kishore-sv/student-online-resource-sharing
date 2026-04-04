@@ -1,9 +1,19 @@
+import { Metadata } from 'next'
 import Footer from '@/components/footer'
 import Navbar from '@/components/Navbar'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, BookOpen, Users, Zap, GraduationCap } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Connect, Share, and Learn',
+  description: 'The ultimate collaborative platform for students. Share study notes, research papers, and educational resources with peers worldwide.',
+  openGraph: {
+    title: 'StudyHub - Share Knowledge, Learn Together',
+    description: 'Connect with students worldwide and share educational resources.',
+  }
+}
 
 export default function Home() {
   return (
@@ -36,14 +46,14 @@ export default function Home() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/signup">
-                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 px-8 text-base">
+                  <Button className="bg-primary cursor-pointer hover:bg-primary/90 text-primary-foreground h-12 px-8 text-base">
                     Start Sharing
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
                 <Button
                   variant="outline"
-                  className="border-border hover:bg-secondary/10 h-12 px-8 text-base"
+                  className="border-border cursor-pointer hover:bg-secondary/10 h-12 px-8 text-base"
                 >
                   Watch Demo
                 </Button>
@@ -144,7 +154,7 @@ export default function Home() {
             <Link href="/signup">
               <Button
                 size="lg"
-                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 h-12 px-8 text-base font-medium"
+                className="bg-primary-foreground cursor-pointer text-primary hover:bg-primary-foreground/90 h-12 px-8 text-base font-medium"
               >
                 Get Started Free
                 <ArrowRight className="w-5 h-5 ml-2" />

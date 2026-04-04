@@ -113,10 +113,10 @@ const MenuBar = ({ editor }: { editor: any }) => {
         <Terminal className="h-4 w-4" />
       </Toggle>
       <Separator orientation="vertical" className="h-4" />
-      <Button variant="ghost" size="sm" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()}>
+      <Button className="cursor-pointer" variant="ghost" size="sm" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()}>
         <Undo className="h-4 w-4" />
       </Button>
-      <Button variant="ghost" size="sm" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()}>
+      <Button className="cursor-pointer" variant="ghost" size="sm" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()}>
         <Redo className="h-4 w-4" />
       </Button>
     </div>
@@ -130,24 +130,24 @@ const CodeBlockComponent = ({ node, updateAttributes }: { node: any, updateAttri
     <NodeViewWrapper className="my-6 border rounded-md overflow-hidden bg-muted/40">
       <div className="flex items-center gap-2 px-3 py-1.5 border-b bg-muted/60">
         <div className="flex-1 flex items-center gap-2">
-            {getIconForFile(filename, language)}
-            <input 
-                className="bg-transparent border-none text-xs font-mono w-full focus:ring-0 outline-none" 
-                placeholder="Filename..." 
-                value={filename} 
-                onChange={e => updateAttributes({ filename: e.target.value })} 
-            />
+          {getIconForFile(filename, language)}
+          <input
+            className="bg-transparent border-none text-xs font-mono w-full focus:ring-0 outline-none"
+            placeholder="Filename..."
+            value={filename}
+            onChange={e => updateAttributes({ filename: e.target.value })}
+          />
         </div>
-        <select 
-            className="bg-transparent border-none text-[10px] uppercase font-bold focus:ring-0 outline-none" 
-            value={language} 
-            onChange={e => updateAttributes({ language: e.target.value })}
+        <select
+          className="bg-transparent border-none text-[10px] uppercase font-bold focus:ring-0 outline-none"
+          value={language}
+          onChange={e => updateAttributes({ language: e.target.value })}
         >
-            <option value="auto">Auto</option>
-            <option value="javascript">JS</option>
-            <option value="typescript">TS</option>
-            <option value="python">Python</option>
-            <option value="java">Java</option>
+          <option value="auto">Auto</option>
+          <option value="javascript">JS</option>
+          <option value="typescript">TS</option>
+          <option value="python">Python</option>
+          <option value="java">Java</option>
         </select>
       </div>
       <pre className="p-4 bg-zinc-950 text-zinc-100">
@@ -208,8 +208,8 @@ export default function WriteBlog() {
         const base64 = await new Promise<string>(r => { reader.onload = () => r(reader.result as string); reader.readAsDataURL(thumbnail) })
         thumbnailUrl = await uploadBlogThumbnail(base64, thumbnail.name)
       }
-      const resource = await createResource({ 
-        title, description, category: "blog", visibility, url: thumbnailUrl, content, authorId: session.user.id, tags 
+      const resource = await createResource({
+        title, description, category: "blog", visibility, url: thumbnailUrl, content, authorId: session.user.id, tags
       })
       toast.success("Published!")
       router.push(`/resource/${resource.id}`)
@@ -227,8 +227,8 @@ export default function WriteBlog() {
             <Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbPage>Write Blog</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>
           </div>
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm" asChild><NextLink href="/home">Cancel</NextLink></Button>
-            <Button size="sm" onClick={handlePublish} disabled={isSubmitting}>
+            <Button className="cursor-pointer" variant="ghost" size="sm" asChild><NextLink href="/home">Cancel</NextLink></Button>
+            <Button className="cursor-pointer" size="sm" onClick={handlePublish} disabled={isSubmitting}>
               {isSubmitting ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Send className="mr-2 h-4 w-4" />}
               Publish
             </Button>
@@ -270,7 +270,7 @@ export default function WriteBlog() {
                     <Label>Tags</Label>
                     <div className="flex gap-2">
                       <Input value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => e.key === "Enter" && (setTags([...tags, tagInput]), setTagInput(""))} />
-                      <Button variant="secondary" size="sm" onClick={() => (setTags([...tags, tagInput]), setTagInput(""))}>Add</Button>
+                      <Button className="cursor-pointer" variant="secondary" size="sm" onClick={() => (setTags([...tags, tagInput]), setTagInput(""))}>Add</Button>
                     </div>
                     <div className="flex flex-wrap gap-1 pt-2">
                       {tags.map(t => <Badge key={t} variant="secondary" className="gap-1">{t} <X className="size-3 cursor-pointer" onClick={() => setTags(tags.filter(i => i !== t))} /></Badge>)}

@@ -1,5 +1,5 @@
 "use client"
- 
+
 import { useState, useEffect } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { ResourceCard } from "@/components/resource-card"
@@ -36,7 +36,7 @@ export default function ResourcesPage() {
         fetchResources()
     }, [username])
 
-    const filteredResources = resources.filter(res => 
+    const filteredResources = resources.filter(res =>
         res.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         res.description?.toLowerCase().includes(searchQuery.toLowerCase())
     )
@@ -71,14 +71,14 @@ export default function ResourcesPage() {
                                     {isOwnProfile ? "Your Resources" : `@${username}'s Resources`}
                                 </h1>
                                 <p className="text-muted-foreground font-medium">
-                                    {isOwnProfile 
-                                        ? "Manage and organize all your shared documents and study materials." 
+                                    {isOwnProfile
+                                        ? "Manage and organize all your shared documents and study materials."
                                         : `Browse all resources shared by @${username}.`}
                                 </p>
                             </div>
-                            
+
                             {isOwnProfile && (
-                                <Button className="rounded-xl h-11 px-8 transition-all hover:shadow-xl hover:shadow-primary/20 shadow-md group" asChild>
+                                <Button className="rounded-xl cursor-pointer h-11 px-8 transition-all hover:shadow-xl hover:shadow-primary/20 shadow-md group" asChild>
                                     <a href="/home">
                                         <Plus className="size-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
                                         Share New Resource
@@ -90,14 +90,14 @@ export default function ResourcesPage() {
                         <div className="flex items-center gap-3 w-full max-w-md mx-auto md:mx-0">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                                <Input 
-                                    placeholder="Search resources..." 
+                                <Input
+                                    placeholder="Search resources..."
                                     className="pl-10 h-11 rounded-xl bg-background border-muted shadow-sm focus-visible:ring-primary"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
-                            <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl shadow-sm">
+                            <Button variant="outline" size="icon" className="h-11 w-11 cursor-pointer rounded-lg shadow-sm">
                                 <Filter className="size-4" />
                             </Button>
                         </div>
@@ -122,14 +122,14 @@ export default function ResourcesPage() {
                                     </div>
                                     <h3 className="text-2xl font-black mb-3">No resources found</h3>
                                     <p className="text-muted-foreground max-w-sm mx-auto mb-10 leading-relaxed font-medium">
-                                        {searchQuery 
+                                        {searchQuery
                                             ? `We couldn't find any resources matching "${searchQuery}".`
-                                            : isOwnProfile 
-                                                ? "You haven't shared anything yet. Help your fellow students by uploading your study materials!" 
+                                            : isOwnProfile
+                                                ? "You haven't shared anything yet. Help your fellow students by uploading your study materials!"
                                                 : `@${username} hasn't shared any resources yet.`}
                                     </p>
                                     {isOwnProfile && (
-                                        <Button className="rounded-2xl h-14 px-10 text-lg font-bold transition-all hover:scale-105 shadow-xl hover:shadow-primary/30" asChild>
+                                        <Button className="rounded-lg cursor-pointer h-14 px-10 text-lg font-bold transition-all hover:scale-105 shadow-xl hover:shadow-primary/30" asChild>
                                             <a href="/home">Start Sharing Now</a>
                                         </Button>
                                     )}

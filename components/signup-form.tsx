@@ -163,7 +163,7 @@ export function SignupForm({
               </Field>
 
               <Field>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
                   {loading ? "Creating account..." : "Create Account"}
                 </Button>
               </Field>

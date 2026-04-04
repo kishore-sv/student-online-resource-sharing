@@ -48,14 +48,14 @@ export function UploadResourceDialog({ open, onOpenChange }: UploadResourceDialo
     if (!session?.user) return
 
     setIsUploading(true)
-    
+
     // In a real app, you'd upload these to S3/ImageKit first.
     // For now, we'll simulate it by creating a data list.
     const resourceFiles = selectedFiles.map(file => ({
-        name: file.name,
-        url: URL.createObjectURL(file), // Placeholder URL
-        size: (file.size / 1024 / 1024).toFixed(2) + " MB",
-        type: file.type
+      name: file.name,
+      url: URL.createObjectURL(file), // Placeholder URL
+      size: (file.size / 1024 / 1024).toFixed(2) + " MB",
+      type: file.type
     }))
 
     const { error }: any = await createResource({
@@ -139,9 +139,9 @@ export function UploadResourceDialog({ open, onOpenChange }: UploadResourceDialo
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
           <DialogClose asChild>
-            <Button variant="outline" className="w-full sm:w-auto">Cancel</Button>
+            <Button variant="outline" className="w-full sm:w-auto cursor-pointer">Cancel</Button>
           </DialogClose>
-          <Button onClick={handleUpload} disabled={isUploading} className="w-full sm:w-auto">
+          <Button onClick={handleUpload} disabled={isUploading} className="w-full sm:w-auto cursor-pointer">
             {isUploading ? "Uploading..." : "Publish"}
           </Button>
         </DialogFooter>

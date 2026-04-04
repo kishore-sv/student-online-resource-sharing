@@ -107,13 +107,13 @@ export default function Page() {
               <p className="text-muted-foreground text-sm">Share knowledge with your community</p>
             </div>
             <div className="flex gap-3 items-center">
-              <Button onClick={() => setIsUploadOpen(true)}>
+              <Button onClick={() => setIsUploadOpen(true)} className="cursor-pointer">
                 <Upload className="mr-2 h-4 w-4" />
                 Upload file
               </Button>
               <UploadResourceDialog open={isUploadOpen} onOpenChange={setIsUploadOpen} />
               <Link href="/write-blog">
-                <Button variant="outline">
+                <Button variant="outline" className="cursor-pointer">
                   <Pencil className="mr-2 h-4 w-4" />
                   Write blog
                 </Button>
@@ -235,7 +235,7 @@ export default function Page() {
               variant="default"
               onClick={handleProfileUpdate}
               disabled={isUpdatingProfile}
-              className="w-full"
+              className="w-full cursor-pointer"
             >
               {isUpdatingProfile ? "Saving..." : "Save changes"}
             </Button>

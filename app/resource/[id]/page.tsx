@@ -85,7 +85,7 @@ export default function SingleResourcePage() {
             <div className="flex flex-col items-center justify-center h-screen gap-4">
                 <FileText className="size-12 text-muted-foreground" />
                 <h1 className="text-xl font-semibold">Resource Not Found</h1>
-                <Button onClick={() => router.push("/home")}>Back to Home</Button>
+                <Button className="cursor-pointer" onClick={() => router.push("/home")}>Back to Home</Button>
             </div>
         )
     }
@@ -154,7 +154,7 @@ export default function SingleResourcePage() {
                         {isOwner && (
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
+                                    <Button variant="ghost" size="sm" className="text-destructive cursor-pointer hover:bg-destructive/10">
                                         <Trash className="size-4 mr-2" /> Delete
                                     </Button>
                                 </AlertDialogTrigger>
@@ -207,10 +207,11 @@ export default function SingleResourcePage() {
                             </div>
 
                             <div className="flex items-center gap-2 border-y py-4 flex-wrap">
-                                <Button variant={liked ? "default" : "outline"} size="sm" onClick={handleToggleLike}>
+                                <Button className="cursor-pointer" variant={liked ? "default" : "outline"} size="sm" onClick={handleToggleLike}>
                                     <Heart className={cn("size-4 mr-2", liked && "fill-current")} /> {resource.likes?.length || 0}
                                 </Button>
                                 <Button
+                                    className="cursor-pointer"
                                     variant={saved ? "default" : "outline"}
                                     size="sm"
                                     onClick={async () => {
@@ -222,7 +223,7 @@ export default function SingleResourcePage() {
                                 >
                                     <Bookmark className={cn("size-4 mr-2", saved && "fill-current")} /> {saved ? "Saved" : "Save"}
                                 </Button>
-                                <Button variant="outline" size="sm" onClick={() => {
+                                <Button className="cursor-pointer" variant="outline" size="sm" onClick={() => {
                                     navigator.clipboard.writeText(window.location.href);
                                     toast.success("Link copied");
                                 }}>
@@ -304,7 +305,7 @@ export default function SingleResourcePage() {
                                             className="min-h-[100px]"
                                         />
                                         <div className="flex justify-end">
-                                            <Button size="sm" onClick={handlePostComment} disabled={!newComment.trim()}>Post comment</Button>
+                                            <Button className="cursor-pointer" size="sm" onClick={handlePostComment} disabled={!newComment.trim()}>Post comment</Button>
                                         </div>
                                     </div>
                                     <Separator />
