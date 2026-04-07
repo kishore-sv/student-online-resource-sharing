@@ -2,7 +2,7 @@ import { pgTable, text, timestamp, boolean, uuid, pgEnum } from "drizzle-orm/pg-
 import { relations } from "drizzle-orm";
 
 export const resourceCategoryEnum = pgEnum("resource_category", ["blog", "file"]);
-export const visibilityEnum = pgEnum("visibility", ["public", "private", "shared"]);
+export const visibilityEnum = pgEnum("visibility", ["public", "private", "shared", "followers"]);
 export const permissionTypeEnum = pgEnum("permission_type", ["read", "write", "comment"]);
 
 export const user = pgTable("user", {
@@ -54,7 +54,7 @@ export const verification = pgTable("verification", {
 });
 
 export const resource = pgTable("resource", {
-	id: uuid("id").primaryKey().defaultRandom(),
+	id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
 	title: text("title").notNull(),
 	description: text("description"),
 	category: resourceCategoryEnum("category").notNull().default("file"),
@@ -70,8 +70,8 @@ export const resource = pgTable("resource", {
 });
 
 export const resourceFile = pgTable("resource_file", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	resourceId: uuid("resource_id").notNull().references(() => resource.id, { onDelete: "cascade" }),
+	id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+	resourceId: text("resource_id").notNull().references(() => resource.id, { onDelete: "cascade" }),
 	name: text("name").notNull(),
 	url: text("url").notNull(),
 	size: text("size"),
@@ -80,39 +80,49 @@ export const resourceFile = pgTable("resource_file", {
 });
 
 export const like = pgTable("like", {
-	id: uuid("id").primaryKey().defaultRandom(),
+	id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
 	authorId: text("author_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-	resourceId: uuid("resource_id").notNull().references(() => resource.id, { onDelete: "cascade" }),
+	resourceId: text("resource_id").notNull().references(() => resource.id, { onDelete: "cascade" }),
 });
 
 export const comment = pgTable("comment", {
-	id: uuid("id").primaryKey().defaultRandom(),
+	id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
 	content: text("content").notNull(),
 	authorId: text("author_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-	resourceId: uuid("resource_id").notNull().references(() => resource.id, { onDelete: "cascade" }),
+	resourceId: text("resource_id").notNull().references(() => resource.id, { onDelete: "cascade" }),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const savedResource = pgTable("saved_resource", {
-	id: uuid("id").primaryKey().defaultRandom(),
+	id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
 	userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-	resourceId: uuid("resource_id").notNull().references(() => resource.id, { onDelete: "cascade" }),
+	resourceId: text("resource_id").notNull().references(() => resource.id, { onDelete: "cascade" }),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const permission = pgTable("permission", {
-	id: uuid("id").primaryKey().defaultRandom(),
-	resourceId: uuid("resource_id").references(() => resource.id, { onDelete: "cascade" }),
+	id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+	resourceId: text("resource_id").references(() => resource.id, { onDelete: "cascade" }),
 	sharedWithId: text("shared_with_id").notNull().references(() => user.id, { onDelete: "cascade" }),
 	type: permissionTypeEnum("type").notNull().default("read"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const follow = pgTable("follow", {
-	id: uuid("id").primaryKey().defaultRandom(),
+	id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
 	followerId: text("follower_id").notNull().references(() => user.id, { onDelete: "cascade" }),
 	followingId: text("following_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const notification = pgTable("notification", {
+	id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+	userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+	type: text("type").notNull(), // "follow", "new_resource"
+	message: text("message").notNull(),
+	link: text("link"),
+	isRead: boolean("is_read").default(false).notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -124,6 +134,7 @@ export const userRelations = relations(user, ({ many }) => ({
 	permissionsRecieved: many(permission, { relationName: "sharedWith" }),
 	followers: many(follow, { relationName: "following" }),
 	following: many(follow, { relationName: "follower" }),
+	notifications: many(notification),
 }));
 
 export const followRelations = relations(follow, ({ one }) => ({
@@ -200,5 +211,12 @@ export const permissionRelations = relations(permission, ({ one }) => ({
 		fields: [permission.sharedWithId],
 		references: [user.id],
 		relationName: "sharedWith",
+	}),
+}));
+
+export const notificationRelations = relations(notification, ({ one }) => ({
+	user: one(user, {
+		fields: [notification.userId],
+		references: [user.id],
 	}),
 }));

@@ -72,6 +72,7 @@ export function UploadResourceDialog({ open, onOpenChange }: UploadResourceDialo
     setIsUploading(false)
     if (!error) {
       toast.success("Resource shared!")
+      window.dispatchEvent(new Event("resource-updated"))
       setTitle("")
       setDescription("")
       setTopics([])
@@ -107,7 +108,7 @@ export function UploadResourceDialog({ open, onOpenChange }: UploadResourceDialo
                 <SelectContent>
                   <SelectItem value="Public">Public</SelectItem>
                   <SelectItem value="Private">Private</SelectItem>
-                  <SelectItem value="Shared">Friends</SelectItem>
+                  <SelectItem value="Followers">Friends (Followers)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

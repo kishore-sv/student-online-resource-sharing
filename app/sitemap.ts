@@ -3,6 +3,8 @@ import { db } from '@/lib/db'
 import { resource } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
+export const dynamic = 'force-dynamic'
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://resoure.kishore-sv.me'
 

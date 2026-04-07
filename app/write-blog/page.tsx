@@ -178,7 +178,7 @@ export default function WriteBlog() {
   const { data: session } = authClient.useSession()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [visibility, setVisibility] = useState<"public" | "private" | "shared">("public")
+  const [visibility, setVisibility] = useState<"public" | "private" | "shared" | "followers">("public")
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState("")
   const [thumbnail, setThumbnail] = useState<File | null>(null)
@@ -241,6 +241,7 @@ export default function WriteBlog() {
         title, description, category: "blog", visibility, url: thumbnailUrl, content, authorId: session.user.id, tags
       })
       toast.success("Published!")
+      window.dispatchEvent(new Event("resource-updated"))
       router.push(`/resource/${resource.id}`)
     } catch (e) { toast.error("Failed to publish") } finally { setIsSubmitting(false) }
   }
@@ -291,7 +292,7 @@ export default function WriteBlog() {
                       <SelectContent>
                         <SelectItem value="public">Public</SelectItem>
                         <SelectItem value="private">Private</SelectItem>
-                        <SelectItem value="shared">Friends</SelectItem>
+                        <SelectItem value="followers">Friends (Followers)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

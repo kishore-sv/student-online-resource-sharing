@@ -123,9 +123,11 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <IconBell
-                />
-                Notifications
+                <a href="/notifications" className="flex items-center gap-1 w-full">
+                  <IconBell
+                  />
+                  Notifications
+                </a>
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer" onClick={() => { theme === "dark" ? setTheme("light") : setTheme("dark") }}>
                 <IconBrightness />

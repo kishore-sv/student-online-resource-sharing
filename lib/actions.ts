@@ -1,15 +1,16 @@
 "use server"
 import { db } from "./db";
-import { resource, like, comment, user, savedResource, resourceFile } from "./db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { resource, like, comment, user, savedResource, resourceFile, notification, follow } from "./db/schema";
+import { eq, and, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { uploadImage } from "./imagekit";
+import { pusherServer } from "./pusher";
 
 export async function createResource(data: {
     title: string;
     description?: string;
     category: "blog" | "file";
-    visibility: "public" | "private" | "shared";
+    visibility: "public" | "private" | "shared" | "followers";
     url?: string;
     content?: string;
     authorId: string;
@@ -31,15 +32,42 @@ export async function createResource(data: {
         );
     }
     
+    
+    // Trigger notification for followers
+    if (data.visibility === "public" || data.visibility === "followers") {
+        const followersData = await db.query.follow.findMany({
+            where: eq(follow.followingId, data.authorId),
+        });
+
+        const authorData = await db.query.user.findFirst({
+            where: eq(user.id, data.authorId)
+        });
+
+        for (const f of followersData) {
+            const message = `${authorData?.name || authorData?.username} created a new ${data.category}: ${data.title}`;
+            const [newNotification] = await db.insert(notification).values({
+                userId: f.followerId,
+                type: "new_resource",
+                message,
+                link: `/resource/${newResource.id}`,
+            }).returning();
+
+            await pusherServer.trigger(`user-${f.followerId}`, "notification:new", newNotification);
+        }
+    }
+
     revalidatePath("/home");
     revalidatePath("/feed");
+    const authorData = await db.query.user.findFirst({
+        where: eq(user.id, data.authorId)
+    });
+    if (authorData?.username) {
+        revalidatePath(`/${authorData.username}/profile`);
+    }
     return newResource;
 }
 
 export async function toggleLike(resourceId: string, userId: string) {
-    const localIds = ["neet-prep", "dsa-prep", "dbms-prep", "os-notes", "learn-react", "expert-express"];
-    if (localIds.includes(resourceId)) return;
-
     const existing = await db.query.like.findFirst({
         where: and(eq(like.resourceId, resourceId), eq(like.authorId, userId))
     });
@@ -109,9 +137,6 @@ export async function uploadBlogThumbnail(arg1: FormData | string, arg2?: string
 }
 
 export async function toggleSave(resourceId: string, userId: string) {
-    const localIds = ["neet-prep", "dsa-prep", "dbms-prep", "os-notes", "learn-react", "expert-express"];
-    if (localIds.includes(resourceId)) return;
-
     const existing = await db.query.savedResource.findFirst({
         where: and(eq(savedResource.resourceId, resourceId), eq(savedResource.userId, userId))
     });
@@ -136,17 +161,63 @@ export async function toggleFollow(followerId: string, followingId: string) {
         await db.delete(follow).where(eq(follow.id, existing.id));
     } else {
         await db.insert(follow).values({ followerId, followingId });
+        
+        // Trigger notification for following
+        const followerData = await db.query.user.findFirst({
+            where: eq(user.id, followerId)
+        });
+
+        const [newNotification] = await db.insert(notification).values({
+            userId: followingId,
+            type: "follow",
+            message: `${followerData?.name || followerData?.username} started following you`,
+            link: `/${followerData?.username}/profile`,
+        }).returning();
+
+        await pusherServer.trigger(`user-${followingId}`, "notification:new", newNotification);
     }
 
     revalidatePath("/profile");
+    revalidatePath("/followers");
+}
+
+export async function markNotificationAsRead(id: string) {
+    await db.update(notification).set({ isRead: true }).where(eq(notification.id, id));
+    revalidatePath("/notifications");
+}
+
+export async function deleteNotification(id: string) {
+    await db.delete(notification).where(eq(notification.id, id));
+    revalidatePath("/notifications");
+}
+
+export async function deleteManyNotifications(ids: string[]) {
+    await db.delete(notification).where(inArray(notification.id, ids));
+    revalidatePath("/notifications");
 }
 
 export async function getOurResource(id: string) {
+    const { seedInitialResources } = await import("./db/seed");
+    await seedInitialResources();
+    
     const fs = await import("fs/promises");
     const path = await import("path");
     const matter = (await import("gray-matter")).default;
 
     try {
+        const metadata = await db.query.resource.findFirst({
+            where: eq(resource.id, id),
+            with: {
+                author: true,
+                likes: true,
+                comments: {
+                    with: { author: true },
+                    orderBy: [desc(comment.createdAt)]
+                },
+                savedResources: true
+            }
+        });
+
         const filePath = path.join(process.cwd(), "our-resources", `${id}.mdx`);
         const fileContent = await fs.readFile(filePath, "utf8");
         const { data, content } = matter(fileContent);
@@ -155,14 +226,15 @@ export async function getOurResource(id: string) {
             id,
             ...data,
             content,
-            author: { 
+            author: metadata?.author || { 
                 name: "StudyHub", 
-                username: "StudyHub",
+                username: "studyhub",
                 image: null 
             },
-            createdAt: new Date(data.date || Date.now()),
-            likes: [],
-            comments: [],
+            createdAt: metadata?.createdAt || new Date(data.date || Date.now()),
+            likes: metadata?.likes || [],
+            comments: metadata?.comments || [],
+            savedResources: metadata?.savedResources || [],
             visibility: "public",
             category: "blog"
         };

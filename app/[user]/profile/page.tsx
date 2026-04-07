@@ -113,7 +113,7 @@ export default function ProfilePage() {
                 const usernameStr = typeof usernameParam === 'string' ? usernameParam : usernameParam?.[0]
                 const [userData, resData] = await Promise.all([
                     getUserByUsername(usernameStr),
-                    getResourcesByUser(usernameStr)
+                    getResourcesByUser(usernameStr, session?.user?.id)
                 ])
                 setTargetProfile(userData)
                 setResources(resData)
@@ -228,8 +228,12 @@ export default function ProfilePage() {
                 <main className="flex-1 overflow-auto p-4 md:p-8 pt-0">
                     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
                         <div className="flex flex-col gap-2">
-                            <h1 className="text-3xl font-bold tracking-tight">Your Profile</h1>
-                            <p className="text-muted-foreground">Manage your personal information and view your shared resources.</p>
+                            <h1 className="text-3xl font-bold tracking-tight">{isOwnProfile ? "Your Profile" : `${profile.name}'s Profile`}</h1>
+                            <p className="text-muted-foreground">
+                                {isOwnProfile 
+                                    ? "Manage your personal information and view your shared resources." 
+                                    : `View all resources shared by @${profile.username}.`}
+                            </p>
                         </div>
 
                         <div className="flex flex-col gap-8">
@@ -364,8 +368,12 @@ export default function ProfilePage() {
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <h2 className="text-2xl font-bold">Your Resources</h2>
-                                        <p className="text-muted-foreground text-sm">Resources you have shared with the community</p>
+                                        <h2 className="text-2xl font-bold">{isOwnProfile ? "Your Resources" : "Shared Resources"}</h2>
+                                        <p className="text-muted-foreground text-sm">
+                                            {isOwnProfile 
+                                                ? "Resources you have shared with the community" 
+                                                : `Resources shared by ${profile.name}`}
+                                        </p>
                                     </div>
                                 </div>
 

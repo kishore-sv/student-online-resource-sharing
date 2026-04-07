@@ -55,7 +55,7 @@ export default function SearchPage() {
         try {
             const [users, resources] = await Promise.all([
                 searchUsers(searchQuery),
-                searchResources(searchQuery)
+                searchResources(searchQuery, session?.user?.id)
             ])
             setUserResults(users)
             setResourceResults(resources)

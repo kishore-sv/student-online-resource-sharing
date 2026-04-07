@@ -15,7 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { IconBook, IconSearch, IconSend, IconUpload } from "@tabler/icons-react"
+import { IconBook, IconSearch, IconSend, IconUpload, IconBell } from "@tabler/icons-react"
 import { authClient } from "@/lib/auth-client"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Home, Pencil, Users } from "lucide-react"
@@ -38,11 +38,6 @@ const data = {
       title: "Write Blog",
       url: "/write-blog",
       icon: (<Pencil />),
-    },
-    {
-      title: "Community",
-      url: "/followers",
-      icon: (<Users />),
     }
   ],
   navSecondary: [
@@ -61,15 +56,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isLoadingResources, setIsLoadingResources] = React.useState(false)
   const [isUploadOpen, setIsUploadOpen] = React.useState(false)
 
-  React.useEffect(() => {
+  const fetchResources = React.useCallback(() => {
     if (user?.username) {
       setIsLoadingResources(true)
-      getResourcesByUser(user.username).then((res) => {
+      getResourcesByUser(user.username, user.id).then((res) => {
         setResources(res)
         setIsLoadingResources(false)
       })
     }
-  }, [user?.username])
+  }, [user?.username, user?.id])
+
+  React.useEffect(() => {
+    fetchResources()
+
+    window.addEventListener("resource-updated", fetchResources)
+    return () => window.removeEventListener("resource-updated", fetchResources)
+  }, [fetchResources])
 
   const handleTogglePin = async (resourceId: string, currentState: boolean) => {
     setResources(prev => prev.map(r => r.id === resourceId ? { ...r, isPinned: !currentState } : r))
@@ -114,7 +116,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: "Search",
             url: "/search",
             icon: (<IconSearch />)
-          }
+          },
         ]} />
         <NavYourResources
           resources={resources}

@@ -52,12 +52,12 @@ export default function Page() {
 
     // Fetch real resources
     const fetchResources = async () => {
-      const data = await getPublicResources(20)
+      const data = await getPublicResources(20, session?.user?.id)
       setFeatured(data.slice(0, 10))
       setPopular(data.slice(10, 20))
     }
     fetchResources()
-  }, [session])
+  }, [session?.user?.id])
 
   const handleProfileUpdate = async () => {
     if (!selectedCollege || !username) {
@@ -88,7 +88,7 @@ export default function Page() {
     <>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset>
+        <SidebarInset className="overflow-x-hidden max-w-full">
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
@@ -125,17 +125,21 @@ export default function Page() {
 
           <div className="p-6 space-y-12">
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold tracking-tight">Featured</h2>
-                <div className="flex items-center gap-2">
-                  <Link href="/all-resources" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                    View all
-                  </Link>
-                </div>
-              </div>
-
               <Carousel className="w-full">
-                <CarouselContent className="-ml-4 p-2">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold tracking-tight">Featured</h2>
+                  <div className="flex items-center gap-4">
+                    <Link href="/all-resources" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                      View all
+                    </Link>
+                    <div className="flex items-center gap-2">
+                      <CarouselPrevious className="relative inset-0 translate-y-0 h-8 w-8 hover:bg-muted" />
+                      <CarouselNext className="relative inset-0 translate-y-0 h-8 w-8 hover:bg-muted" />
+                    </div>
+                  </div>
+                </div>
+
+                <CarouselContent className="-ml-4 p-2 pt-4">
                   {featured.length > 0 ? featured.map(resource => (
                     <CarouselItem key={resource.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
                       <ResourceCard resource={resource} />
@@ -151,21 +155,25 @@ export default function Page() {
                     </div>
                   )}
                 </CarouselContent>
-                <CarouselPrevious className="hidden md:flex -left-4 bg-background shadow-md border-border" />
-                <CarouselNext className="hidden md:flex -right-4 bg-background shadow-md border-border" />
               </Carousel>
             </div>
 
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold tracking-tight">Popular in Education</h2>
-                <Link href="/all-resources?category=education" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                  View all
-                </Link>
-              </div>
-
               <Carousel className="w-full">
-                <CarouselContent className="-ml-4 p-2">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold tracking-tight">Popular in Education</h2>
+                  <div className="flex items-center gap-4">
+                    <Link href="/all-resources?category=education" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                      View all
+                    </Link>
+                    <div className="flex items-center gap-2">
+                      <CarouselPrevious className="relative inset-0 translate-y-0 h-8 w-8 hover:bg-muted" />
+                      <CarouselNext className="relative inset-0 translate-y-0 h-8 w-8 hover:bg-muted" />
+                    </div>
+                  </div>
+                </div>
+
+                <CarouselContent className="-ml-4 p-2 pt-4">
                   {popular.length > 0 ? popular.map(resource => (
                     <CarouselItem key={resource.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
                       <ResourceCard resource={resource} />
@@ -181,8 +189,6 @@ export default function Page() {
                     </div>
                   )}
                 </CarouselContent>
-                <CarouselPrevious className="hidden md:flex -left-4 bg-background shadow-md border-border" />
-                <CarouselNext className="hidden md:flex -right-4 bg-background shadow-md border-border" />
               </Carousel>
             </div>
           </div>
