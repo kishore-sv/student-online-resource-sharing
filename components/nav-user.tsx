@@ -112,6 +112,13 @@ export function NavUser({
                   Saved Resources
                 </a>
               </DropdownMenuItem>
+              <DropdownMenuItem>
+                <a href="/followers" className="flex items-center gap-1 w-full">
+                  <IconRosetteDiscountCheck
+                  />
+                  Followers
+                </a>
+              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>

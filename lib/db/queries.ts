@@ -1,6 +1,6 @@
 "use server"
 import { db } from "./index";
-import { resource, user, like, comment, savedResource } from "./schema";
+import { resource, user, like, comment, savedResource, follow } from "./schema";
 import { desc, eq, sql, and, ilike } from "drizzle-orm";
 
 export async function getPublicResources(limit = 10) {
@@ -125,4 +125,24 @@ export async function getSavedResources(userId: string) {
         orderBy: [desc(savedResource.createdAt)],
     });
     return saved.map(s => s.resource);
+}
+
+export async function getFollowers(userId: string) {
+    const followers = await db.query.follow.findMany({
+        where: eq(follow.followingId, userId),
+        with: {
+            follower: true
+        }
+    });
+    return followers.map(f => f.follower);
+}
+
+export async function getFollowing(userId: string) {
+    const following = await db.query.follow.findMany({
+        where: eq(follow.followerId, userId),
+        with: {
+            following: true
+        }
+    });
+    return following.map(f => f.following);
 }

@@ -18,7 +18,7 @@ import {
 import { IconBook, IconSearch, IconSend, IconUpload } from "@tabler/icons-react"
 import { authClient } from "@/lib/auth-client"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Home, Pencil } from "lucide-react"
+import { Home, Pencil, Users } from "lucide-react"
 import { getResourcesByUser } from "@/lib/db/queries"
 import { togglePin, deleteResource } from "@/lib/actions"
 import { toast } from "sonner"
@@ -38,6 +38,11 @@ const data = {
       title: "Write Blog",
       url: "/write-blog",
       icon: (<Pencil />),
+    },
+    {
+      title: "Community",
+      url: "/followers",
+      icon: (<Users />),
     }
   ],
   navSecondary: [

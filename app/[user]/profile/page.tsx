@@ -27,6 +27,7 @@ import { updateUser, uploadBlogThumbnail } from "@/lib/actions"
 import { getResourcesByUser, getUserByUsername } from "@/lib/db/queries"
 import { toast } from "sonner"
 import { useParams } from "next/navigation"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -246,8 +247,18 @@ export default function ProfilePage() {
                                         <div className="space-y-4 text-center md:text-left flex-1 w-full">
                                             <div>
                                                 <CardTitle className="text-3xl mb-1">{profile.name}</CardTitle>
-                                                <div className="flex items-center gap-2">
+                                                <div className="flex flex-wrap items-center gap-4 mt-1">
                                                     <span className="text-sm font-medium text-muted-foreground">@{profile.username}</span>
+                                                    <div className="flex items-center gap-3">
+                                                        <Link href="/followers" className="text-sm hover:underline hover:text-primary transition-colors">
+                                                            <span className="font-bold text-foreground">{(profile as any).followers?.length || 0}</span>
+                                                            <span className="text-muted-foreground ml-1">Followers</span>
+                                                        </Link>
+                                                        <Link href="/followers" className="text-sm hover:underline hover:text-primary transition-colors">
+                                                            <span className="font-bold text-foreground">{(profile as any).following?.length || 0}</span>
+                                                            <span className="text-muted-foreground ml-1">Following</span>
+                                                        </Link>
+                                                    </div>
                                                 </div>
                                             </div>
 
