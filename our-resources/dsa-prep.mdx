@@ -1,0 +1,37 @@
+---
+title: "DSA Prep: Data Structures & Algorithms"
+description: "Master coding interviews with this comprehensive DSA guide."
+author: "StudyHub"
+tags: ["dsa", "coding", "interviews"]
+date: "2024-03-21"
+---
+
+# DSA Preparation
+
+Mastering Data Structures and Algorithms is key to becoming a top-tier software engineer.
+
+## Key Data Structures
+- Arrays & Strings
+- Linked Lists
+- Stacks & Queues
+- Trees & Graphs
+
+## Essential Algorithms
+- Sorting & Searching
+- Dynamic Programming
+- Recursion & Backtracking
+
+```javascript
+function binarySearch(arr, target) {
+  let left = 0;
+  let right = arr.length - 1;
+  while (left <= right) {
+    let mid = Math.floor((left + right) / 2);
+    if (arr[mid] === target) return mid;
+    else if (arr[mid] < target) left = mid + 1;
+    else right = mid - 1;
+  }
+  return -1;
+}
+```
+"Stay consistent, solve daily."

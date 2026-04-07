@@ -11,6 +11,8 @@ import { JsIcon, TsIcon, ReactIcon, PythonIcon, SpringIcon, HtmlIcon, CssIcon } 
 import { FileCode, Copy, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
 
+import { Markdown } from "tiptap-markdown"
+
 const lowlight = createLowlight(common)
 
 const getIconForFile = (filename: string | null, language: string | null) => {
@@ -78,8 +80,8 @@ export function BlogViewer({ content }: { content: string }) {
     content,
     extensions: [
       StarterKit.configure({ codeBlock: false }),
-      Link,
       Image,
+      Markdown,
       CodeBlockLowlight.extend({
         addAttributes() {
           return {

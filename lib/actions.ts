@@ -37,6 +37,9 @@ export async function createResource(data: {
 }
 
 export async function toggleLike(resourceId: string, userId: string) {
+    const localIds = ["neet-prep", "dsa-prep", "dbms-prep", "os-notes", "learn-react", "expert-express"];
+    if (localIds.includes(resourceId)) return;
+
     const existing = await db.query.like.findFirst({
         where: and(eq(like.resourceId, resourceId), eq(like.authorId, userId))
     });
@@ -106,6 +109,9 @@ export async function uploadBlogThumbnail(arg1: FormData | string, arg2?: string
 }
 
 export async function toggleSave(resourceId: string, userId: string) {
+    const localIds = ["neet-prep", "dsa-prep", "dbms-prep", "os-notes", "learn-react", "expert-express"];
+    if (localIds.includes(resourceId)) return;
+
     const existing = await db.query.savedResource.findFirst({
         where: and(eq(savedResource.resourceId, resourceId), eq(savedResource.userId, userId))
     });
@@ -118,4 +124,50 @@ export async function toggleSave(resourceId: string, userId: string) {
 
     revalidatePath(`/resource/${resourceId}`);
     revalidatePath("/saved");
+}
+
+export async function toggleFollow(followerId: string, followingId: string) {
+    const { follow } = await import("./db/schema");
+    const existing = await db.query.follow.findFirst({
+        where: and(eq(follow.followerId, followerId), eq(follow.followingId, followingId))
+    });
+
+    if (existing) {
+        await db.delete(follow).where(eq(follow.id, existing.id));
+    } else {
+        await db.insert(follow).values({ followerId, followingId });
+    }
+
+    revalidatePath("/profile");
+}
+
+export async function getOurResource(id: string) {
+    const fs = await import("fs/promises");
+    const path = await import("path");
+    const matter = (await import("gray-matter")).default;
+
+    try {
+        const filePath = path.join(process.cwd(), "our-resources", `${id}.mdx`);
+        const fileContent = await fs.readFile(filePath, "utf8");
+        const { data, content } = matter(fileContent);
+        
+        return {
+            id,
+            ...data,
+            content,
+            author: { 
+                name: "StudyHub", 
+                username: "StudyHub",
+                image: null 
+            },
+            createdAt: new Date(data.date || Date.now()),
+            likes: [],
+            comments: [],
+            visibility: "public",
+            category: "blog"
+        };
+    } catch (error) {
+        console.error("Error reading MDX resource:", error);
+        return null;
+    }
 }

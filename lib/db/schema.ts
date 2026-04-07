@@ -109,12 +109,34 @@ export const permission = pgTable("permission", {
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const follow = pgTable("follow", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	followerId: text("follower_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+	followingId: text("following_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const userRelations = relations(user, ({ many }) => ({
 	resources: many(resource),
 	likes: many(like),
 	comments: many(comment),
 	savedResources: many(savedResource),
 	permissionsRecieved: many(permission, { relationName: "sharedWith" }),
+	followers: many(follow, { relationName: "following" }),
+	following: many(follow, { relationName: "follower" }),
+}));
+
+export const followRelations = relations(follow, ({ one }) => ({
+	follower: one(user, {
+		fields: [follow.followerId],
+		references: [user.id],
+		relationName: "follower",
+	}),
+	following: one(user, {
+		fields: [follow.followingId],
+		references: [user.id],
+		relationName: "following",
+	}),
 }));
 
 export const resourceRelations = relations(resource, ({ one, many }) => ({

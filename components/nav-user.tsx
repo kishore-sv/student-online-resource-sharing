@@ -115,11 +115,11 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              {/* <DropdownMenuItem>
+              <DropdownMenuItem>
                 <IconBell
                 />
                 Notifications
-              </DropdownMenuItem> */}
+              </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer" onClick={() => { theme === "dark" ? setTheme("light") : setTheme("dark") }}>
                 <IconBrightness />
                 Toggle Theme

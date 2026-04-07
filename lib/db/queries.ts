@@ -68,7 +68,44 @@ export async function searchUsers(query: string) {
 
 export async function getUserByUsername(username: string) {
     return await db.query.user.findFirst({
-        where: eq(user.username, username)
+        where: eq(user.username, username),
+        with: {
+            followers: {
+                with: {
+                    follower: true
+                }
+            },
+            following: {
+                with: {
+                    following: true
+                }
+            },
+            resources: {
+                where: eq(resource.visibility, 'public'),
+                with: {
+                    likes: true,
+                    comments: true,
+                    files: true,
+                    author: true
+                },
+                orderBy: [desc(resource.createdAt)]
+            }
+        }
+    });
+}
+
+export async function searchResources(query: string) {
+    return await db.query.resource.findMany({
+        where: and(
+            eq(resource.visibility, "public"),
+            ilike(resource.title, `%${query}%`)
+        ),
+        with: {
+            author: true,
+            likes: true,
+            comments: true,
+        },
+        limit: 10
     });
 }
 

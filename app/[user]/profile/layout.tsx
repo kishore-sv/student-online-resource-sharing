@@ -2,14 +2,14 @@ import { Metadata, ResolvingMetadata } from 'next'
 import { getUserByUsername } from '@/lib/db/queries'
 
 type Props = {
-  params: { user: string }
+  params: Promise<{ user: string }>
 }
 
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const username = params.user
+  const { user: username } = await params
   const user = await getUserByUsername(username)
 
   if (!user) {

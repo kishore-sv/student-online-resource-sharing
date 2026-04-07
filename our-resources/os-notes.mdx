@@ -1,0 +1,253 @@
+---
+title: "OS complete notes: Operating Systems"
+description: "Review core OS concepts from processes to memory management."
+author: "StudyHub"
+tags: ["os", "operating-systems", "notes"]
+date: "2024-03-23"
+---
+
+# Operating Systems: Complete Study Notes
+
+Most students treat OS like theory. That’s exactly why they fail interviews.
+
+OS is not about definitions — it’s about **understanding how a computer actually runs programs**. If you can’t explain behavior (not just definitions), you don’t know OS.
+
+---
+
+## 1. What is an Operating System?
+
+An Operating System (OS) is a **resource manager + control program**.
+
+### Key Functions:
+- Process management  
+- Memory management  
+- File system handling  
+- Device management  
+- Security & access control  
+
+👉 Reality:
+> OS is the layer between **hardware and user programs**
+
+---
+
+## 2. Process Management (Very Important)
+
+A **process = program in execution**
+
+### Process States:
+- New  
+- Ready  
+- Running  
+- Waiting (Blocked)  
+- Terminated  
+
+### CPU Scheduling Algorithms
+
+| Algorithm | Idea | Problem |
+|----------|------|--------|
+| FCFS | First come, first served | High waiting time |
+| SJF (Shortest Job First) | Smallest job first | Starvation |
+| Round Robin | Time slicing | Context switching overhead |
+| Priority Scheduling | Based on priority | Starvation possible |
+
+👉 Key Concept:
+- **Context Switching** = saving & loading process state (expensive)
+
+👉 Interview Trap:
+> “Difference between process and thread?”
+
+- Process → independent memory  
+- Thread → shared memory (lightweight)
+
+---
+
+## 3. Threads (Frequently Asked)
+
+- Threads are **smaller units inside a process**
+- Share:
+  - Code
+  - Data
+  - Heap  
+
+- Separate:
+  - Stack
+  - Registers  
+
+### Types:
+- User-level threads  
+- Kernel-level threads  
+
+👉 Truth:
+> Multithreading improves performance but introduces **race conditions**
+
+---
+
+## 4. Synchronization (Critical for Interviews)
+
+When multiple processes access shared data → problems happen.
+
+### Problems:
+- Race Condition  
+- Deadlock  
+- Starvation  
+
+### Solutions:
+- Mutex  
+- Semaphore  
+- Monitors  
+
+### Deadlock Conditions (Must Remember):
+1. Mutual Exclusion  
+2. Hold and Wait  
+3. No Preemption  
+4. Circular Wait  
+
+👉 If all 4 exist → deadlock possible
+
+---
+
+## 5. Memory Management (Core Topic)
+
+Memory is limited → OS must manage efficiently.
+
+### Paging:
+- Memory divided into fixed-size pages  
+- Avoids external fragmentation  
+
+### Segmentation:
+- Memory divided based on logical units  
+- Can cause fragmentation  
+
+### Virtual Memory:
+- Uses disk as extension of RAM  
+
+👉 Key Concept:
+- **Page Fault** = required page not in memory
+
+---
+
+## 6. Page Replacement Algorithms
+
+| Algorithm | Idea |
+|----------|------|
+| FIFO | Remove oldest page |
+| LRU | Remove least recently used |
+| Optimal | Remove page not needed in future |
+
+👉 Reality:
+> Optimal is theoretical, LRU is practical
+
+---
+
+## 7. File Systems
+
+OS organizes data on storage devices.
+
+### Functions:
+- File creation & deletion  
+- Directory structure  
+- Access control  
+
+### Types:
+- FAT  
+- NTFS  
+- ext4  
+
+👉 Key Idea:
+> File system = mapping between logical files & physical storage
+
+---
+
+## 8. I/O Management
+
+Handles communication between system and hardware devices.
+
+### Techniques:
+- Polling  
+- Interrupts  
+- DMA (Direct Memory Access)  
+
+👉 Important:
+- Interrupts improve CPU efficiency
+
+---
+
+## 9. System Calls (Must Know)
+
+Interface between user programs and OS.
+
+Examples:
+- `fork()` → create process  
+- `exec()` → execute program  
+- `wait()` → wait for process  
+- `exit()` → terminate  
+
+👉 Interview Focus:
+> Difference between user mode and kernel mode
+
+---
+
+## 10. Common Mistakes Students Make
+
+- Memorizing definitions without understanding  
+- Ignoring process scheduling problems  
+- Skipping deadlock & synchronization  
+- Not practicing numerical problems  
+
+---
+
+## 11. Exam + Interview Strategy
+
+### For Semester Exams:
+- Focus on:
+  - Definitions + diagrams  
+  - Scheduling algorithms  
+  - Memory management  
+
+### For Interviews:
+- Focus on:
+  - Concepts + real-world explanation  
+  - “Why” instead of “What”  
+
+👉 If you can explain:
+> “What happens when you open a program?”
+
+You understand OS.
+
+---
+
+## Bonus: Simple OS Concept Code
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+
+int main() {
+    int pid = fork();  // create a new process
+
+    if (pid == 0) {
+        printf("Child Process\n");
+    } else {
+        printf("Parent Process\n");
+    }
+
+    return 0;
+}
+```
+
+### This demonstrates:
+
+- Process creation
+- Parent vs Child execution
+
+### Final Advice
+
+If you treat OS like a theory subject → average marks, no placement.
+
+If you treat it like:
+
+> “How does my system actually work internally?”
+
+Then you’re ahead of 90% of students.
+
+Stop memorizing. Start understanding.

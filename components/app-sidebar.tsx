@@ -15,7 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { IconBook, IconSend, IconUpload } from "@tabler/icons-react"
+import { IconBook, IconSearch, IconSend, IconUpload } from "@tabler/icons-react"
 import { authClient } from "@/lib/auth-client"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Home, Pencil } from "lucide-react"
@@ -23,6 +23,8 @@ import { getResourcesByUser } from "@/lib/db/queries"
 import { togglePin, deleteResource } from "@/lib/actions"
 import { toast } from "sonner"
 import { UploadResourceDialog } from "@/components/upload-resource-dialog"
+import { title } from "process"
+import { url } from "inspector"
 
 const data = {
   navMain: [
@@ -36,7 +38,7 @@ const data = {
       title: "Write Blog",
       url: "/write-blog",
       icon: (<Pencil />),
-    },
+    }
   ],
   navSecondary: [
     {
@@ -103,6 +105,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             icon: (<IconUpload />),
             onClick: () => setIsUploadOpen(true),
           },
+          {
+            title: "Search",
+            url: "/search",
+            icon: (<IconSearch />)
+          }
         ]} />
         <NavYourResources
           resources={resources}

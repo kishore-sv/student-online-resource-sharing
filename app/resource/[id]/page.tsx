@@ -47,7 +47,16 @@ export default function SingleResourcePage() {
     useEffect(() => {
         const fetchResource = async () => {
             if (id) {
-                const data = await getResourceById(id as string)
+                const localIds = ["neet-prep", "dsa-prep", "dbms-prep", "os-notes", "learn-react", "expert-express"];
+                let data: any = null;
+                
+                if (localIds.includes(id as string)) {
+                    const { getOurResource } = await import("@/lib/actions");
+                    data = await getOurResource(id as string);
+                } else {
+                    data = await getResourceById(id as string);
+                }
+
                 if (data) {
                     setResource(data)
                     setLiked(data.likes?.some((l: any) => l.authorId === session?.user?.id))

@@ -2,15 +2,24 @@ import { Metadata, ResolvingMetadata } from 'next'
 import { getResourceById } from '@/lib/db/queries'
 
 type Props = {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const id = params.id
-  const resource = await getResourceById(id)
+  const { id } = await params
+  
+  const localIds = ["neet-prep", "dsa-prep", "dbms-prep", "os-notes", "learn-react", "expert-express"];
+  let resource: any = null;
+  
+  if (localIds.includes(id)) {
+      const { getOurResource } = await import("@/lib/actions");
+      resource = await getOurResource(id);
+  } else {
+      resource = await getResourceById(id);
+  }
 
   if (!resource) {
     return {
