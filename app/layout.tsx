@@ -17,14 +17,14 @@ export const metadata: Metadata = {
   },
   description: 'A collaborative platform for students to share and discover educational resources. Upload notes, write blogs, and learn together.',
   keywords: ['StudyHub', 'notes sharing', 'student resources', 'education platform', 'collaborative learning', 'academic blogs'],
-  metadataBase: new URL('https://resoure.kishore-sv.me'),
+  metadataBase: new URL('https://resource.kishore-sv.me'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://resoure.kishore-sv.me',
+    url: 'https://resource.kishore-sv.me',
     siteName: 'StudyHub',
     title: 'StudyHub - Share Knowledge, Learn Together',
     description: 'A collaborative platform for students to share and discover educational resources.',
@@ -79,6 +79,9 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} h-full antialiased selection:bg-blue-500 selection:text-primary-foreground`}
     >
+      <head>
+        <meta name="google-site-verification" content="jCZEMBZli1xqreUKnEgoNvrmaQ2RnHp56pSpl_bbPo4" />
+      </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider
           attribute="class"

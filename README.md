@@ -55,7 +55,7 @@ Create a `.env` file in the root directory:
 ```bash
 DATABASE_URL=
 BETTER_AUTH_SECRET=
-NEXT_PUBLIC_APP_URL=https://resoure.kishore-sv.me
+NEXT_PUBLIC_APP_URL=https://resource.kishore-sv.me
 IMAGEKIT_PUBLIC_KEY=
 IMAGEKIT_PRIVATE_KEY=
 IMAGEKIT_URL_ENDPOINT=

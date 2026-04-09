@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://resoure.kishore-sv.me/sitemap.xml
+Sitemap: https://resource.kishore-sv.me/sitemap.xml

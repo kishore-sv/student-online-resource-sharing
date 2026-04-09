@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm'
 export const dynamic = 'force-dynamic'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://resoure.kishore-sv.me'
+  const baseUrl = 'https://resource.kishore-sv.me'
 
   // Fetch all public resources
   const publicResources = await db.query.resource.findMany({
